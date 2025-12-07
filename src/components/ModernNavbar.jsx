@@ -253,7 +253,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                   </div>
 
                   {/* Quick Links */}
-                  <div className="mt-8 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+                  <div className="mt-8 p-4 rounded-xl bg-linear-to-r from-purple-50 to-pink-50 border border-purple-100">
                     <h4 className="font-bold text-gray-800 mb-3">
                       Quick Start
                     </h4>
@@ -341,7 +341,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                         </div>
                         <div className="mt-3 h-2 rounded-full bg-gray-200 overflow-hidden">
                           <div
-                            className={`h-full bg-gradient-to-r ${plan.color} transition-all duration-500 group-hover:w-full`}
+                            className={`h-full bg-linear-to-r ${plan.color} transition-all duration-500 group-hover:w-full`}
                             style={{ width: plan.popular ? "80%" : "60%" }}
                           />
                         </div>
@@ -353,7 +353,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 p-6 bg-gradient-to-r from-gray-50 to-white">
+            <div className="border-t border-gray-200 p-6 bg-linear-to-r from-gray-50 to-white">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-6">
                   <span className="text-sm text-gray-600 flex items-center gap-2">
@@ -374,7 +374,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                     navigate("/new");
                     onClose();
                   }}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+                  className="px-6 py-3 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all"
                 >
                   Explore Products
                 </button>
@@ -429,7 +429,7 @@ const FloatingActionButton = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/40 flex items-center justify-center"
+        className="w-14 h-14 rounded-2xl bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/40 flex items-center justify-center"
       >
         {isOpen ? <X size={24} /> : <Sparkles size={24} />}
       </motion.button>
@@ -487,13 +487,13 @@ const ModernNavbar = () => {
               onClick={() => navigate("/")}
             >
               <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center">
                   <ShoppingBag size={24} className="text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-linear-to-r from-blue-500 to-cyan-500 animate-pulse" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   CommercePro
                 </h1>
                 <p className="text-xs text-gray-500">AI-Powered E-commerce</p>
@@ -521,7 +521,7 @@ const ModernNavbar = () => {
                 {/* Active Indicator */}
                 <motion.div
                   layoutId="activeIndicator"
-                  className="absolute -bottom-1 left-4 right-4 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                  className="absolute -bottom-1 left-4 right-4 h-0.5 bg-linear-to-r from-purple-500 to-pink-500 rounded-full"
                   initial={false}
                   animate={isMegaMenuOpen ? { opacity: 1 } : { opacity: 0 }}
                 />
@@ -550,7 +550,7 @@ const ModernNavbar = () => {
                   {isActive(item.path) && (
                     <motion.div
                       layoutId="activeNav"
-                      className="absolute -bottom-1 left-4 right-4 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                      className="absolute -bottom-1 left-4 right-4 h-0.5 bg-linear-to-r from-purple-500 to-pink-500 rounded-full"
                     />
                   )}
                 </motion.div>
@@ -574,7 +574,7 @@ const ModernNavbar = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate("/signup")}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all flex items-center gap-2"
                 >
                   <UserPlus size={18} />
                   Sign Up Free
@@ -606,7 +606,7 @@ const ModernNavbar = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate("/signup")}
-                  className="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-sm shadow-lg shadow-purple-500/30"
+                  className="px-3 py-2 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold text-sm shadow-lg shadow-purple-500/30"
                 >
                   Signup
                 </motion.button>
@@ -651,7 +651,7 @@ const ModernNavbar = () => {
                     {item.icon}
                     <span className="font-semibold">{item.label}</span>
                     {isActive(item.path) && (
-                      <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
+                      <div className="ml-auto w-2 h-2 rounded-full bg-linear-to-r from-purple-500 to-pink-500" />
                     )}
                   </motion.button>
                 ))}
@@ -674,14 +674,14 @@ const ModernNavbar = () => {
                       navigate("/signup");
                       setIsMenuOpen(false);
                     }}
-                    className="p-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold"
+                    className="p-3 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold"
                   >
                     Sign Up
                   </motion.button>
                 </div>
 
                 {/* Features Mobile */}
-                <div className="p-4 mt-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50">
+                <div className="p-4 mt-4 rounded-xl bg-linear-to-r from-purple-50 to-pink-50">
                   <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <Sparkles size={16} />
                     Key Features
@@ -721,7 +721,7 @@ const ModernNavbar = () => {
 
       {/* Scroll Progress Indicator */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 z-50 origin-left"
+        className="fixed top-0 left-0 right-0 h-1 bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 z-50 origin-left"
         style={{
           scaleX: isScrolled
             ? 0.3 + (window.scrollY / (document.body.scrollHeight || 1000)) * 0.7

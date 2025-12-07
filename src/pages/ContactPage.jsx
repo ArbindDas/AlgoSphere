@@ -333,7 +333,7 @@ const ContactPage = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50/30 to-amber-50/20 overflow-hidden">
+    <div className="relative min-h-screen bg-linear-to-br from-emerald-50 via-blue-50/30 to-amber-50/20 overflow-hidden">
       {/* Background Effects */}
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none opacity-20" />
       
@@ -347,20 +347,20 @@ const ContactPage = () => {
       <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/10 rounded-full blur-3xl" />
 
       {/* Navigation */}
-      <nav className="relative z-20 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm sticky top-0">
+      <nav className="relative z-20 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm top-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-green-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-linear-to-br from-emerald-600 to-green-500 rounded-lg flex items-center justify-center">
               <ShoppingBag className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-linear-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">
               ShopSecure
             </span>
           </div>
           <div className="flex items-center gap-6">
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2"
+              className="bg-linear-to-r from-emerald-600 to-green-500 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2"
             >
               <Headphones className="w-4 h-4" />
               Need Help?
@@ -379,14 +379,14 @@ const ContactPage = () => {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-emerald-200/50">
+              <div className="inline-flex items-center gap-2 bg-linear-to-r from-emerald-500/10 to-green-500/10 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-emerald-200/50">
                 <ShieldCheck className="w-4 h-4" />
                 100% Secure Shopping Guaranteed
               </div>
               
               <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
                 <span className="block">Shopping Support</span>
-                <span className="block bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">
+                <span className="block bg-linear-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">
                   {typingText}
                   <span className="animate-pulse">|</span>
                 </span>
@@ -415,7 +415,7 @@ const ContactPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsModalOpen(true)}
-                className="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:shadow-emerald-500/30 transition-all inline-flex items-center gap-3"
+                className="bg-linear-to-r from-emerald-600 to-green-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:shadow-emerald-500/30 transition-all inline-flex items-center gap-3"
               >
                 <Headphones className="w-5 h-5" />
                 Get Help Now
@@ -435,17 +435,17 @@ const ContactPage = () => {
                   onClick={card.action}
                   className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all border border-gray-200/50 group cursor-pointer relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-emerald-500/5 to-green-500/5 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300" />
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-linear-to-br from-emerald-500/5 to-green-500/5 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300" />
                   
                   {card.badge && (
                     <div className="absolute top-3 right-3">
-                      <span className="text-xs font-semibold bg-gradient-to-r from-emerald-500 to-green-600 text-white px-2 py-1 rounded-full">
+                      <span className="text-xs font-semibold bg-linear-to-r from-emerald-500 to-green-600 text-white px-2 py-1 rounded-full">
                         {card.badge}
                       </span>
                     </div>
                   )}
                   
-                  <div className={`bg-gradient-to-br ${card.color} w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg relative z-10`}>
+                  <div className={`bg-linear-to-br ${card.color} w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg relative z-10`}>
                     <card.icon className="w-7 h-7 text-white" />
                   </div>
                   
@@ -470,11 +470,11 @@ const ContactPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-white via-emerald-50/30 to-green-50/20 rounded-3xl p-12 shadow-2xl border border-gray-200/50 backdrop-blur-sm"
+            className="bg-linear-to-br from-white via-emerald-50/30 to-green-50/20 rounded-3xl p-12 shadow-2xl border border-gray-200/50 backdrop-blur-sm"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <div className="inline-flex items-center gap-2 bg-linear-to-r from-blue-500/10 to-cyan-500/10 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
                   <Truck className="w-4 h-4" />
                   Fast & Reliable Shipping
                 </div>
@@ -516,7 +516,7 @@ const ContactPage = () => {
                     { city: 'Australia', address: '1 Martin Place, Sydney', hours: '24/7 Support' }
                   ].map((office, idx) => (
                     <div key={idx} className="flex items-start gap-4 p-4 hover:bg-gray-50/50 rounded-xl transition-colors">
-                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-green-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-linear-to-br from-emerald-100 to-green-100 rounded-lg flex items-center justify-center">
                         <MapPin className="w-6 h-6 text-emerald-600" />
                       </div>
                       <div>
@@ -556,7 +556,7 @@ const ContactPage = () => {
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all group"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 bg-linear-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <item.icon className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
@@ -573,7 +573,7 @@ const ContactPage = () => {
       {/* Stats Section */}
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-r from-emerald-600 to-green-500 rounded-3xl p-12 shadow-2xl">
+          <div className="bg-linear-to-r from-emerald-600 to-green-500 rounded-3xl p-12 shadow-2xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
                 { value: '1M+', label: 'Happy Customers', icon: Users },
@@ -618,9 +618,9 @@ const ContactPage = () => {
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-gradient-to-br from-white via-emerald-50/30 to-green-50/20 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/50 backdrop-blur-sm"
+                className="bg-linear-to-br from-white via-emerald-50/30 to-green-50/20 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/50 backdrop-blur-sm"
               >
-                <div className="sticky top-0 bg-gradient-to-r from-white via-white/95 to-white border-b border-gray-200/50 px-8 py-6 flex items-center justify-between rounded-t-3xl backdrop-blur-sm">
+                <div className="sticky top-0 bg-linear-to-r from-white via-white/95 to-white border-b border-gray-200/50 px-8 py-6 flex items-center justify-between rounded-t-3xl backdrop-blur-sm">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">Shopping Support Request</h2>
                     <p className="text-gray-600 text-sm mt-1">Include your order number for faster help</p>
@@ -642,7 +642,7 @@ const ContactPage = () => {
                       className="text-center py-12"
                     >
                       <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-xl opacity-20 animate-pulse" />
+                        <div className="absolute inset-0 bg-linear-to-r from-green-400 to-emerald-500 rounded-full blur-xl opacity-20 animate-pulse" />
                         <div className="relative bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                           <CheckCircle className="w-12 h-12 text-green-600" />
                         </div>
@@ -726,7 +726,7 @@ const ContactPage = () => {
                               type="button"
                               onClick={() => setFormState({ ...formState, subject: option.value })}
                               className={`px-4 py-2 rounded-lg transition-all ${formState.subject === option.value 
-                                ? 'bg-gradient-to-r from-emerald-600 to-green-500 text-white shadow-md' 
+                                ? 'bg-linear-to-r from-emerald-600 to-green-500 text-white shadow-md' 
                                 : 'bg-white/80 text-gray-700 hover:bg-gray-100 border border-gray-300/50'}`}
                             >
                               {option.label}
@@ -751,7 +751,7 @@ const ContactPage = () => {
                       </div>
 
                       <div className="flex items-center gap-3 bg-blue-50/50 p-4 rounded-xl border border-blue-200/50">
-                        <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                        <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
                         <p className="text-sm text-blue-700">
                           Your information is protected with 256-bit SSL encryption. We'll only use it to help with your shopping inquiry.
                         </p>
@@ -762,9 +762,9 @@ const ContactPage = () => {
                         disabled={isSubmitting || !formState.name || !formState.email || !formState.message}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full bg-gradient-to-r from-emerald-600 to-green-500 text-white font-bold py-4 rounded-xl hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 relative overflow-hidden group"
+                        className="w-full bg-linear-to-r from-emerald-600 to-green-500 text-white font-bold py-4 rounded-xl hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 relative overflow-hidden group"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                        <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                         {isSubmitting ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -794,15 +794,15 @@ const ContactPage = () => {
       </AnimatePresence>
 
       {/* Enhanced Footer */}
-      <footer className="relative z-10 bg-gradient-to-b from-white/90 via-white/80 to-white border-t border-gray-200/50 px-6 py-12">
+      <footer className="relative z-10 bg-linear-to-b from-white/90 via-white/80 to-white border-t border-gray-200/50 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-green-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-linear-to-br from-emerald-600 to-green-500 rounded-lg flex items-center justify-center">
                   <ShoppingBag className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">
+                <span className="text-xl font-bold bg-linear-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent">
                   ShopSecure
                 </span>
               </div>

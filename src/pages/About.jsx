@@ -156,7 +156,7 @@ const StatCounter = ({ end, label, suffix = "", duration = 2 }) => {
 
   return (
     <div ref={ref} className="text-center">
-      <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+      <div className="text-5xl md:text-6xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
         {count}
         {suffix}
       </div>
@@ -170,7 +170,7 @@ const FeatureCard = ({ icon, title, description, delay = 0 }) => {
   return (
     <GlassCard delay={delay}>
       <div className="p-8 md:p-10">
-        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 text-3xl text-white shadow-lg shadow-purple-200">
+        <div className="w-16 h-16 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 text-3xl text-white shadow-lg shadow-purple-200">
           {icon}
         </div>
         <h3 className="text-2xl font-bold text-gray-800 mb-4">{title}</h3>
@@ -191,9 +191,9 @@ const CategoryCard = ({ name, icon, delay = 0 }) => {
       className="group cursor-pointer"
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-200 to-pink-200 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-all duration-500" />
+        <div className="absolute inset-0 bg-linear-to-br from-purple-200 to-pink-200 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-all duration-500" />
         <div className="relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-purple-300 transition-all duration-500 shadow-lg hover:shadow-xl">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-4xl text-white shadow-lg">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-4xl text-white shadow-lg">
             {icon}
           </div>
           <h3 className="text-xl font-bold text-gray-800 text-center mb-2">
@@ -221,7 +221,7 @@ const SecurityBadge = ({ title, description, delay = 0 }) => {
       className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
     >
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
           <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
@@ -245,10 +245,11 @@ const About = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-800 relative overflow-hidden">
+    <div className="min-h-screen 
+     from-gray-50 via-white to-gray-50 text-gray-800 relative overflow-hidden">
       {/* Progress Bar */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 origin-left z-50"
+        className="fixed top-0 left-0 right-0 h-1 bg-linear-to-r from-purple-500 to-pink-500 origin-left z-50"
         style={{ scaleX }}
       />
 
@@ -281,7 +282,7 @@ const About = () => {
             >
               Shop Smarter,
               <br />
-              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
                 Live Better
               </span>
             </motion.h1>
@@ -378,7 +379,7 @@ const About = () => {
       </section>
 
       {/* Features Section */}
-      <section className="relative py-32 px-6 bg-gradient-to-b from-transparent via-purple-50/50 to-transparent">
+      <section className="relative py-32 px-6 bg-linear-to-b from-transparent via-purple-50/50 to-transparent">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -457,7 +458,7 @@ const About = () => {
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight text-gray-800">
                   Shop With Complete
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     {" "}
                     Peace of Mind
                   </span>
@@ -490,7 +491,7 @@ const About = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300"
+                  className="px-8 py-4 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300"
                 >
                   Shop Securely Now
                 </motion.button>
@@ -505,12 +506,12 @@ const About = () => {
                 transition={{ duration: 0.8 }}
                 className="relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-200 to-pink-200 rounded-3xl blur-3xl opacity-50" />
+                <div className="absolute inset-0 bg-linear-to-br from-purple-200 to-pink-200 rounded-3xl blur-3xl opacity-50" />
                 <div className="relative aspect-square rounded-3xl bg-white border border-gray-200 overflow-hidden shadow-xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 to-pink-100/40" />
+                  <div className="absolute inset-0 bg-linear-to-br from-purple-100/40 to-pink-100/40" />
                   <div className="p-10 h-full flex flex-col justify-center">
                     <div className="text-center mb-8">
-                      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-4xl text-white shadow-lg">
+                      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center text-4xl text-white shadow-lg">
                         🔒
                       </div>
                       <h3 className="text-2xl font-bold text-gray-800 mb-4">
@@ -527,7 +528,7 @@ const About = () => {
                         "24/7 security monitoring"
                       ].map((item, index) => (
                         <div key={index} className="flex items-center gap-3">
-                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                             <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
@@ -569,7 +570,7 @@ const About = () => {
             <GlassCard>
               <div className="p-8">
                 <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                     SJ
                   </div>
                   <div className="ml-4">
@@ -593,7 +594,7 @@ const About = () => {
             <GlassCard delay={0.1}>
               <div className="p-8">
                 <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                     MR
                   </div>
                   <div className="ml-4">
@@ -617,7 +618,7 @@ const About = () => {
             <GlassCard delay={0.2}>
               <div className="p-8">
                 <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                     EP
                   </div>
                   <div className="ml-4">
@@ -656,7 +657,7 @@ const About = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-10 py-5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300"
+                  className="px-10 py-5 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300"
                 >
                   Start Shopping Now
                 </motion.button>
