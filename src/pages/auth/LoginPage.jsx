@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
@@ -13,265 +14,15 @@ import {
   CheckCircle,
   ArrowRight,
   Shield,
-  Smartphone
+  Smartphone,
+  AlertCircle
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-// Three.js Background for Auth Pages
-const AuthBackground = ({ type = "login" }) => {
-  const mountRef = useRef(null);
-
-  useEffect(() => {
-    if (!mountRef.current) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance"
-    });
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mountRef.current.appendChild(renderer.domElement);
-
-    // Create floating geometric shapes
-    const geometries = [
-      new THREE.OctahedronGeometry(1, 0),
-      new THREE.DodecahedronGeometry(1, 0),
-      new THREE.IcosahedronGeometry(1, 0),
-      new THREE.TorusKnotGeometry(1, 0.3, 100, 16)
-    ];
-
-    const colors = type === "login" 
-      ? [0x8b5cf6, 0x3b82f6, 0x6366f1, 0xec4899]
-      : [0x10b981, 0x06b6d4, 0x8b5cf6, 0xf59e0b];
-
-    const shapes = [];
-    const shapeCount = 8;
-
-    for (let i = 0; i < shapeCount; i++) {
-      const geometry = geometries[i % geometries.length];
-      const material = new THREE.MeshStandardMaterial({
-        color: colors[i % colors.length],
-        emissive: colors[i % colors.length],
-        emissiveIntensity: 0.2,
-        metalness: 0.7,
-        roughness: 0.2,
-        transparent: true,
-        opacity: 0.6
-      });
-
-      const shape = new THREE.Mesh(geometry, material);
-      
-      shape.position.set(
-        (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 20,
-        (Math.random() - 0.5) * 25
-      );
-      
-      shape.scale.setScalar(Math.random() * 0.8 + 0.4);
-      shape.userData = {
-        speed: Math.random() * 0.002 + 0.001,
-        rotationSpeed: Math.random() * 0.01 + 0.005
-      };
-      
-      shapes.push(shape);
-      scene.add(shape);
-    }
-
-    // Create particle system
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 1500;
-    const posArray = new Float32Array(particlesCount * 3);
-    const colorArray = new Float32Array(particlesCount * 3);
-
-    for (let i = 0; i < particlesCount * 3; i += 3) {
-      posArray[i] = (Math.random() - 0.5) * 40;
-      posArray[i + 1] = (Math.random() - 0.5) * 30;
-      posArray[i + 2] = (Math.random() - 0.5) * 40;
-
-      const color = new THREE.Color();
-      const hue = type === "login" ? 0.7 + Math.random() * 0.2 : 0.3 + Math.random() * 0.2;
-      color.setHSL(hue, 0.8, 0.6 + Math.random() * 0.3);
-      colorArray[i] = color.r;
-      colorArray[i + 1] = color.g;
-      colorArray[i + 2] = color.b;
-    }
-
-    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
-    particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
-
-    const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.03,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
-      sizeAttenuation: true
-    });
-
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
-
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 10, 5);
-    scene.add(directionalLight);
-
-    const pointLight = new THREE.PointLight(type === "login" ? 0x8b5cf6 : 0x10b981, 0.5, 50);
-    pointLight.position.set(0, 5, 10);
-    scene.add(pointLight);
-
-    camera.position.z = 25;
-
-    // Animation
-    const animate = () => {
-      requestAnimationFrame(animate);
-      const time = Date.now() * 0.001;
-
-      shapes.forEach((shape, i) => {
-        shape.rotation.x += shape.userData.rotationSpeed;
-        shape.rotation.y += shape.userData.speed;
-        shape.rotation.z += shape.userData.speed * 0.7;
-        
-        // Floating animation
-        shape.position.y += Math.sin(time * 2 + i) * 0.01;
-        shape.position.x += Math.cos(time * 1.5 + i) * 0.008;
-      });
-
-      particlesMesh.rotation.y += 0.0003;
-      particlesMesh.rotation.x += 0.00015;
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      mountRef.current?.removeChild(renderer.domElement);
-      renderer.dispose();
-    };
-  }, [type]);
-
-  return <div ref={mountRef} className="fixed inset-0 -z-10" />;
-};
-
-// Floating Input Component
-const FloatingInput = ({ 
-  label, 
-  type = "text", 
-  icon: Icon, 
-  value, 
-  onChange, 
-  error, 
-  showToggle = false,
-  onToggle,
-  ...props 
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-
-  return (
-    <div className="relative">
-      <motion.div
-        initial={false}
-        animate={{
-          scale: isFocused ? 1.02 : 1,
-          borderColor: error ? "#ef4444" : isFocused ? "#8b5cf6" : "#e5e7eb"
-        }}
-        className="relative bg-white/80 backdrop-blur-sm border-2 rounded-xl overflow-hidden group"
-      >
-        <div className="absolute left-4 top-1/2 -translate-y-1/2">
-          <Icon size={20} className={error ? "text-red-500" : isFocused ? "text-purple-600" : "text-gray-400"} />
-        </div>
-        
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          className="w-full pl-12 pr-12 py-4 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none"
-          placeholder={label}
-          {...props}
-        />
-        
-        {showToggle && (
-          <button
-            type="button"
-            onClick={onToggle}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {type === "password" ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-        )}
-      </motion.div>
-      
-      {error && (
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-red-500 text-sm mt-2 ml-4"
-        >
-          {error}
-        </motion.p>
-      )}
-    </div>
-  );
-};
-
-// OAuth Button Component
-const OAuthButton = ({ provider, icon: Icon, onClick }) => {
-  const providers = {
-    github: { bg: "bg-gray-900", hover: "hover:bg-gray-800", text: "Continue with GitHub" },
-    google: { bg: "bg-white", hover: "hover:bg-gray-50", text: "Continue with Google", border: true },
-    microsoft: { bg: "bg-blue-600", hover: "hover:bg-blue-700", text: "Continue with Microsoft" }
-  };
-
-  const config = providers[provider];
-
-  return (
-    <motion.button
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
-      className={`w-full py-3.5 rounded-xl ${config.bg} ${config.hover} ${
-        config.border ? "border border-gray-300" : ""
-      } text-${provider === "google" ? "gray-800" : "white"} font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl`}
-    >
-      <Icon size={20} />
-      {config.text}
-    </motion.button>
-  );
-};
-
-// Security Badge Component
-const SecurityBadge = ({ icon: Icon, text, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay }}
-    className="flex items-center gap-3 p-3 rounded-lg bg-white/50 backdrop-blur-sm"
-  >
-    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white">
-      <Icon size={20} />
-    </div>
-    <span className="text-sm text-gray-700">{text}</span>
-  </motion.div>
-);
+import AuthBackground from "../../components/AuthBackground";
+import FloatingInput from "../../components/FloatingInput"
+import OAuthButton from "../../components/OAuthButton"
+import SecurityBadge from "../../components/SecurityBadge";
+import authService from "../../api/auth"
 
 // Login Page
 export const LoginPage = () => {
@@ -284,22 +35,328 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  
+  // Track field focus state for real-time validation
+  const [fieldFocus, setFieldFocus] = useState({
+    email: false,
+    password: false,
+  });
+  
+  // Track if user has interacted with form
+  const [hasInteracted, setHasInteracted] = useState({
+    email: false,
+    password: false,
+  });
+  
+  // Track login attempts for security feedback
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  
+  // Debounce timer refs
+  const validationTimer = useRef(null);
+
+  // Real-time validation functions
+  const validateEmail = (value) => {
+    if (!value) {
+      return "Email is required";
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      return "Please enter a valid email address";
+    }
+    
+    // Additional email validation
+    if (value.length > 100) {
+      return "Email is too long";
+    }
+    
+    // Check for common email issues
+    if (value.includes("..") || value.includes(".@") || value.includes("@.")) {
+      return "Email format is invalid";
+    }
+    
+    // Check for spaces in email
+    if (/\s/.test(value)) {
+      return "Email cannot contain spaces";
+    }
+    
+    return "";
+  };
+
+  const validatePassword = (value) => {
+    if (!value) {
+      return "Password is required";
+    }
+    
+    // Basic password validation for login (less strict than signup)
+    if (value.length < 6) {
+      return "Password must be at least 6 characters";
+    }
+    
+    if (value.length > 50) {
+      return "Password is too long";
+    }
+    
+    // Check for suspicious patterns (optional)
+    if (/(.)\1{5,}/.test(value)) {
+      return "Password contains repeating characters";
+    }
+    
+    return "";
+  };
+
+  // Real-time validation handler with debouncing
+  const handleRealTimeValidation = (field, value) => {
+    // Clear existing timer
+    if (validationTimer.current) {
+      clearTimeout(validationTimer.current);
+    }
+    
+    // Set new timer for debouncing
+    validationTimer.current = setTimeout(() => {
+      let error = "";
+      
+      switch (field) {
+        case 'email':
+          error = validateEmail(value);
+          break;
+        case 'password':
+          error = validatePassword(value);
+          break;
+        default:
+          break;
+      }
+      
+      // Update errors state
+      setErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
+      
+    }, 250); // 250ms debounce for faster login feedback
+  };
+
+  // Handle input change with real-time validation
+  const handleInputChange = (field, value) => {
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Mark field as interacted
+    setHasInteracted(prev => ({
+      ...prev,
+      [field]: true
+    }));
+    
+    // Clear submit error when user starts typing
+    if (errors.submit) {
+      setErrors(prev => ({
+        ...prev,
+        submit: ""
+      }));
+    }
+    
+    // Clear other specific errors if they exist
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
+    
+    // Trigger real-time validation
+    handleRealTimeValidation(field, value);
+  };
+
+  // Handle field blur
+  const handleFieldBlur = (field) => {
+    setFieldFocus(prev => ({
+      ...prev,
+      [field]: false
+    }));
+    
+    // Force validation on blur if field has been interacted with
+    if (hasInteracted[field]) {
+      handleRealTimeValidation(field, formData[field]);
+    }
+  };
+
+  // Handle field focus
+  const handleFieldFocus = (field) => {
+    setFieldFocus(prev => ({
+      ...prev,
+      [field]: true
+    }));
+  };
+
+  // Final form validation before submission
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Validate all fields
+    newErrors.email = validateEmail(formData.email);
+    newErrors.password = validatePassword(formData.password);
+    
+    // Filter out empty errors
+    const filteredErrors = Object.fromEntries(
+      Object.entries(newErrors).filter(([_, value]) => value !== "")
+    );
+    
+    setErrors(filteredErrors);
+    
+    // Mark all fields as interacted for UI feedback
+    setHasInteracted({
+      email: true,
+      password: true,
+    });
+    
+    return Object.keys(filteredErrors).length === 0;
+  };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+    
+  //   if (!validateForm()) {
+  //     // Scroll to first error
+  //     const firstErrorField = Object.keys(errors)[0];
+  //     if (firstErrorField) {
+  //       const element = document.querySelector(`[data-field="${firstErrorField}"]`);
+  //       if (element) {
+  //         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  //       }
+  //     }
+  //     return;
+  //   }
+    
+  //   setIsLoading(true);
+    
+  //   try {
+  //     const response = await authService.signin(
+  //       formData.email,
+  //       formData.password
+  //     );
+
+  //     console.log("Login successful: ", response);
+
+  //     // Simulate API call
+  //     setTimeout(() => {
+  //       setIsLoading(false);
+  //       navigate("/dashboard");
+  //     }, 100);
+
+  //     return response.data;
+      
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     setLoginAttempts(prev => prev + 1);
+      
+  //     // Handle different types of errors
+  //     if (error.response?.data?.message) {
+  //       setErrors({ 
+  //         submit: error.response.data.message 
+  //       });
+  //     } else if (error.message) {
+  //       setErrors({ 
+  //         submit: error.message 
+  //       });
+  //     } else {
+  //       setErrors({ 
+  //         submit: "Invalid email or password. Please try again." 
+  //       });
+  //     }
+      
+  //     console.error("Login error:", error);
+  //   }
+  // };
+
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    // Scroll to first error
+    const firstErrorField = Object.keys(errors)[0];
+    if (firstErrorField) {
+      const element = document.querySelector(`[data-field="${firstErrorField}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    return;
+  }
+  
+  setIsLoading(true);
+  
+  try {
+    const response = await authService.signin(
+      formData.email,
+      formData.password
+    );
+
+    console.log("Login successful: ", response);
+
+    // No need for setTimeout - navigate immediately after successful login
+    setIsLoading(false);
+    navigate("/dashboard");
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
-  };
+  } catch (error) {
+    setIsLoading(false);
+    setLoginAttempts(prev => prev + 1);
+    
+    // Handle different types of errors
+    console.error("Login error in handleSubmit:", error);
+    
+    // The error might be a generic Error object thrown by handleError
+    // OR it might be the original axios error
+    if (error.isAxiosError) {
+      // This is the original axios error
+      if (error.response?.data?.message) {
+        setErrors({ 
+          submit: error.response.data.message 
+        });
+      } else if (error.response?.data?.data?.message) {
+        // Try nested message structure
+        setErrors({ 
+          submit: error.response.data.data.message 
+        });
+      } else {
+        setErrors({ 
+          submit: error.message || "Invalid email or password. Please try again." 
+        });
+      }
+    } else {
+      // This is the generic Error thrown by handleError
+      setErrors({ 
+        submit: error.message || "Invalid email or password. Please try again." 
+      });
+    }
+  }
+};
 
   const handleOAuthLogin = (provider) => {
     console.log(`Logging in with ${provider}`);
     // Implement OAuth logic here
+    setErrors({
+      submit: `${provider} OAuth is not yet implemented`
+    });
   };
+  
+  // Get form completeness status
+  const isFormComplete = formData.email && formData.password;
+  
+  // Get form validity status
+  const isFormValid = !errors.email && !errors.password && isFormComplete;
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimer.current) {
+        clearTimeout(validationTimer.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden">
@@ -408,6 +465,40 @@ export const LoginPage = () => {
                     </p>
                   </div>
 
+                  {/* Submit Error Message */}
+                  <AnimatePresence>
+                    {errors.submit && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border border-red-100"
+                      >
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <h4 className="font-semibold text-red-700 text-sm mb-1">
+                              Login Failed
+                            </h4>
+                            <p className="text-red-600 text-sm">{errors.submit}</p>
+                            
+                            {/* Security notice for multiple failed attempts */}
+                            {loginAttempts >= 2 && (
+                              <div className="mt-2 pt-2 border-t border-red-100">
+                                <p className="text-xs text-red-500">
+                                  {loginAttempts >= 3 ? 
+                                    "Multiple failed attempts detected. Consider resetting your password." :
+                                    "Having trouble? Try resetting your password."
+                                  }
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* OAuth Buttons */}
                   <div className="space-y-4 mb-6">
                     <OAuthButton provider="github" icon={Github} onClick={() => handleOAuthLogin("github")} />
@@ -423,27 +514,62 @@ export const LoginPage = () => {
 
                   {/* Login Form */}
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <FloatingInput
-                      label="Email Address"
-                      type="email"
-                      icon={Mail}
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      error={errors.email}
-                      required
-                    />
+                    {/* Email Field */}
+                    <div data-field="email">
+                      <FloatingInput
+                        label="Email Address"
+                        type="email"
+                        icon={Mail}
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        onFocus={() => handleFieldFocus('email')}
+                        onBlur={() => handleFieldBlur('email')}
+                        error={hasInteracted.email ? errors.email : ""}
+                        isValid={hasInteracted.email && !errors.email && formData.email.length > 0}
+                        required
+                      />
+                      
+                      {/* Real-time feedback */}
+                      {fieldFocus.email && formData.email && !errors.email && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-xs text-emerald-600 ml-4 mt-1 flex items-center gap-1"
+                        >
+                          <CheckCircle size={12} />
+                          Valid email format
+                        </motion.div>
+                      )}
+                    </div>
 
-                    <FloatingInput
-                      label="Password"
-                      type={showPassword ? "text" : "password"}
-                      icon={Lock}
-                      value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      error={errors.password}
-                      showToggle
-                      onToggle={() => setShowPassword(!showPassword)}
-                      required
-                    />
+                    {/* Password Field */}
+                    <div data-field="password">
+                      <FloatingInput
+                        label="Password"
+                        type={showPassword ? "text" : "password"}
+                        icon={Lock}
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
+                        onFocus={() => handleFieldFocus('password')}
+                        onBlur={() => handleFieldBlur('password')}
+                        error={hasInteracted.password ? errors.password : ""}
+                        isValid={hasInteracted.password && !errors.password && formData.password.length > 0}
+                        showToggle
+                        onToggle={() => setShowPassword(!showPassword)}
+                        required
+                      />
+                      
+                      {/* Password strength hint */}
+                      {formData.password && !errors.password && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="text-xs text-gray-500 ml-4 mt-1"
+                        >
+                          ✓ Password looks good
+                        </motion.div>
+                      )}
+                    </div>
 
                     {/* Remember Me & Forgot Password */}
                     <div className="flex items-center justify-between">
@@ -462,12 +588,59 @@ export const LoginPage = () => {
                       </Link>
                     </div>
 
+                    {/* Form Status Indicators */}
+                    <AnimatePresence>
+                      {/* Error Summary */}
+                      {Object.keys(errors).length > 0 && !errors.submit && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-3 rounded-lg bg-amber-50 border border-amber-200"
+                        >
+                          <p className="text-xs text-amber-700 flex items-center gap-1">
+                            <AlertCircle size={12} />
+                            Please fix the errors above before signing in
+                          </p>
+                        </motion.div>
+                      )}
+                      
+                      {/* Ready State */}
+                      {isFormValid && !errors.submit && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-3 rounded-lg bg-emerald-50 border border-emerald-200"
+                        >
+                          <p className="text-xs text-emerald-700 flex items-center gap-1">
+                            <CheckCircle size={12} />
+                            All fields are valid. Ready to sign in!
+                          </p>
+                        </motion.div>
+                      )}
+                      
+                      {/* Incomplete Form Hint */}
+                      {!isFormComplete && Object.keys(errors).length === 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-3 rounded-lg bg-blue-50 border border-blue-200"
+                        >
+                          <p className="text-xs text-blue-700">
+                            Fill in your email and password to continue
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Submit Button */}
                     <motion.button
                       type="submit"
-                      disabled={isLoading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      disabled={isLoading || (!isFormValid && isFormComplete)}
+                      whileHover={{ scale: isFormValid ? 1.02 : 1 }}
+                      whileTap={{ scale: isFormValid ? 0.98 : 1 }}
                       className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
