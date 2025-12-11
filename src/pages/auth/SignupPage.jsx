@@ -1300,7 +1300,7 @@ export const SignupPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-cyan-50 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-cyan-50 relative overflow-hidden">
       {/* Background */}
       <AuthBackground type="signup" />
       
@@ -1323,7 +1323,7 @@ export const SignupPage = () => {
                 {/* Signup Card */}
                 <div className="relative">
                   {/* Glow Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-3xl blur-2xl opacity-20" />
+                  <div className="absolute inset-0 bg-linear-to-br from-emerald-500 to-cyan-500 rounded-3xl blur-2xl opacity-20" />
 
                   {/* Form Card */}
                   <div className="relative bg-white/95 backdrop-blur-xl border border-white/40 rounded-3xl p-6 shadow-2xl shadow-black/10">
@@ -1333,7 +1333,7 @@ export const SignupPage = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring" }}
-                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30"
+                        className="w-16 h-16 rounded-2xl bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30"
                       >
                         <Sparkles className="w-8 h-8 text-white" />
                       </motion.div>
@@ -1484,7 +1484,7 @@ export const SignupPage = () => {
                         )}
 
                         {/* Password Requirements with real-time updates */}
-                        <div className="p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-200">
+                        <div className="p-3 rounded-xl bg-linear-to-br from-gray-50 to-white border border-gray-200">
                           <div className="flex justify-between items-center mb-2">
                             <h4 className="font-semibold text-gray-800 text-sm">
                               Password Requirements
@@ -1646,7 +1646,7 @@ export const SignupPage = () => {
                         disabled={isLoading || !isFormValid()}
                         whileHover={{ scale: isFormValid() ? 1.02 : 1 }}
                         whileTap={{ scale: isFormValid() ? 0.98 : 1 }}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-3 rounded-xl bg-linear-to-r from-emerald-600 to-cyan-600 text-white font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isLoading ? (
                           <>
@@ -1696,14 +1696,14 @@ export const SignupPage = () => {
                     className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg"
                   >
                     <Sparkles className="w-4 h-4 text-emerald-500" />
-                    <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent font-bold text-sm">
+                    <span className="bg-linear-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent font-bold text-sm">
                       JOIN THE REVOLUTION
                     </span>
                   </motion.div>
 
                   <h1 className="text-4xl font-bold text-gray-800 mb-4">
                     Start Your
-                    <span className="block bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                    <span className="block bg-linear-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
                       AI Shopping Journey
                     </span>
                   </h1>
@@ -1769,7 +1769,7 @@ export const SignupPage = () => {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.8 + index * 0.1 }}
-                      className="text-center p-3 rounded-xl bg-gradient-to-br from-white to-emerald-50 border border-emerald-100"
+                      className="text-center p-3 rounded-xl bg-linear-to-br from-white to-emerald-50 border border-emerald-100"
                     >
                       <div className="text-base font-bold text-emerald-700">
                         {stat.value}

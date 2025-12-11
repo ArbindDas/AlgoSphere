@@ -359,7 +359,7 @@ export const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden">
       {/* Background */}
       <AuthBackground type="login" />
       
@@ -385,14 +385,15 @@ export const LoginPage = () => {
                   className="inline-flex items-center gap-3 mb-6 px-6 py-3 rounded-full bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg"
                 >
                   <Sparkles className="w-5 h-5 text-purple-500" />
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">
+                  <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">
+
                     WELCOME BACK
                   </span>
                 </motion.div>
                 
                 <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
                   Secure Login to Your
-                  <span className="block bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                  <span className="block bg-linear-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
                     AI-Powered Dashboard
                   </span>
                 </h1>
@@ -442,7 +443,7 @@ export const LoginPage = () => {
               {/* Login Card */}
               <div className="relative">
                 {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-20" />
+                <div className="absolute inset-0 bg-linear-to-br from-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-20" />
                 
                 {/* Form Card */}
                 <div className="relative bg-white/95 backdrop-blur-xl border border-white/40 rounded-3xl p-8 shadow-2xl shadow-black/10">
@@ -452,7 +453,7 @@ export const LoginPage = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.2, type: "spring" }}
-                      className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/30"
+                      className="w-20 h-20 rounded-2xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/30"
                     >
                       <Sparkles className="w-10 h-10 text-white" />
                     </motion.div>
@@ -472,10 +473,10 @@ export const LoginPage = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border border-red-100"
+                        className="mb-6 p-4 rounded-xl bg-linear-to-r from-red-50 to-orange-50 border border-red-100"
                       >
                         <div className="flex items-start gap-3">
-                          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
                           <div>
                             <h4 className="font-semibold text-red-700 text-sm mb-1">
                               Login Failed
@@ -641,7 +642,7 @@ export const LoginPage = () => {
                       disabled={isLoading || (!isFormValid && isFormComplete)}
                       whileHover={{ scale: isFormValid ? 1.02 : 1 }}
                       whileTap={{ scale: isFormValid ? 0.98 : 1 }}
-                      className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-4 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
                         <>
