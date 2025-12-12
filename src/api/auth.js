@@ -259,10 +259,108 @@ const handleError = (error, operation) => {
 };
 
 
-const logout = () => {
-  clearAllTokens();
-  // Optional: Call backend logout endpoint if you have one
-  // axiosInstance.post("/api/v1/auth/logout");
+// const logout = async (logoutAllDevices = false) => {
+//   try {
+//     const token = localStorage.getItem('token');
+    
+//     if (!token) {
+//       console.log('No token found, already logged out');
+//       return;
+//     }
+
+//     const response = await axiosInstance.post(
+//       '/api/v1/auth/logout',
+//       null, // No request body
+//       {
+//         params: { allDevices: logoutAllDevices },
+//         headers: {
+//           'Authorization': `Bearer ${token}`
+//         }
+//       }
+//     );
+
+//     console.log('Logout successful:', response.data);
+
+//     // Clear local storage
+//     localStorage.removeItem('token');
+//     localStorage.removeItem('user');
+//     localStorage.removeItem('cart');
+
+//     // Clear axios default headers
+//     delete axiosInstance.defaults.headers.common['Authorization'];
+
+//     return response.data;
+
+//   } catch (error) {
+//     console.error('Logout failed:', error);
+    
+//     // Still clear local storage even if API call fails
+//     localStorage.removeItem('token');
+//     localStorage.removeItem('user');
+    
+//     throw error;
+//   }
+// };
+
+const logout = async (logoutAllDevices = false) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.log('No token found, already logged out');
+      return { success: true, message: 'Already logged out locally' };
+    }
+
+    const response = await axiosInstance.post(
+      '/api/v1/auth/logout',
+      null,
+      {
+        params: { allDevices: logoutAllDevices },
+        headers: { 'Authorization': `Bearer ${token}` }
+      }
+    );
+
+    // Validate response
+    if (response.status === 200) {
+      console.log(`✅ ${logoutAllDevices ? 'All devices' : 'Current device'} logout successful`);
+      
+      // Clear local storage
+      clearUserData();
+      
+      return {
+        success: true,
+        message: logoutAllDevices 
+          ? 'Logged out from all devices' 
+          : 'Logged out successfully',
+        data: response.data
+      };
+    } else {
+      throw new Error(`Unexpected response: ${response.status}`);
+    }
+
+  } catch (error) {
+    console.error('❌ Logout failed:', error);
+    clearUserData(); // Still clear local data
+    
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Logout failed',
+      error: error
+    };
+  }
+}
+
+// Usage
+const handleLogout = async () => {
+  try {
+    await logout(false); // Logout from current device only
+    // OR
+    // await logout(true); // Logout from all devices
+    navigate('/login');
+  } catch (error) {
+    // Even if API fails, we're logged out locally
+    navigate('/login');
+  }
 };
 
 // Check if user is authenticated
@@ -292,7 +390,8 @@ const authService = {
   clearAllTokens,
   logout,
   isAuthenticated,
-  getCurrentUser
+  getCurrentUser,
+  handleLogout
 };
 
 export default authService;
