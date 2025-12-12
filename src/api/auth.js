@@ -394,4 +394,4 @@ const authService = {
   handleLogout
 };
 
-export default authService;
+export default authService; 
