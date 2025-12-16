@@ -3,9 +3,9 @@ import About from "./pages/About";
 import ContactPage from "./pages/ContactPage";
 import Home from "./pages/Home";
 import NewArrivals from "./pages/NewArrivals";
-import { LoginPage } from "./pages/auth/LoginPage";
-import {SignupPage} from "./pages/auth/SignupPage"
 import UserDashboard from "./pages/user/UserDashboard";
+import LoginPage from "./pages/auth/loginPage/LoginPage";
+import SignupPage from "./pages/auth/signupPage/ SignupPage"
 
 export default function AppRoutes({ user }) {
   return (
