@@ -100,7 +100,7 @@ const ProductCard = ({
 
       {/* Product Image */}
       <div className={`relative h-64 flex items-center justify-center overflow-hidden ${imageBg}`}>
-        <div className={`w-48 h-48 bg-gradient-to-br rounded-full ${gradientBg}`} />
+        <div className={`w-48 h-48 bg-linear-to-br rounded-full ${gradientBg}`} />
         <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'dark' ? 'from-gray-900/50 to-transparent' : 'from-white/50 to-transparent'}`} />
       </div>
 

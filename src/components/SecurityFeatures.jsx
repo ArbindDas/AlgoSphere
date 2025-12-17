@@ -76,7 +76,7 @@ const SecurityFeatures = () => {
           transition={{ duration: 0.6, delay: index * 0.1 }}
           className={`rounded-2xl p-6 transition-all duration-500 border ${cardBg} ${cardShadow}`}
         >
-          <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4`}>
+          <div className={`inline-flex p-3 rounded-xl bg-linear-to-br ${feature.color} mb-4`}>
             {feature.icon}
           </div>
           <h4 className={`font-bold mb-2 ${titleColor}`}>{feature.title}</h4>
