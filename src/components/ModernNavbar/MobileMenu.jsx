@@ -13,6 +13,7 @@ const MobileMenu = ({ isMenuOpen, setIsMenuOpen, location, navigate }) => {
     { path: "/", label: "Home", icon: <Rocket size={18} /> },
     { path: "/about", label: "About", icon: <Users size={18} /> },
     { path: "/new", label: "New Arrivals", icon: <Sparkles size={18} /> },
+    {path: "/contact", label: "Contact", icon :<Users size={18}/>}
   ];
 
   const isActive = (path) => location.pathname === path;
