@@ -24,7 +24,7 @@ export const SignupPage = () => {
     : 'bg-cyan-300/10';
 
   return (
-    <div className={`min-h-screen relative overflow-hidden ${pageBg}`}>
+    <div className={`min-h-screen relative overflow-hidden pt-20 sm:pt-36 lg:pt-20 pb-15 px-4 ${pageBg}`}>
       {/* Background */}
       <AuthBackground type="signup" />
       

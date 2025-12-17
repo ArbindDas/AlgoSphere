@@ -171,13 +171,13 @@ export const LoginPage = () => {
     : 'bg-white white';
 
   return (
-    <div className={`min-h-screen relative overflow-hidden ${pageBg}`}>
+    <div className={`min-h-screen relative overflow-hidden  pt-20 sm:pt-36 lg:pt-20 pb-15 px-4 ${pageBg}`}>
       {/* Background */}
       <AuthBackground type="login" theme={theme} />
       
       {/* Floating Elements */}
       <div className={`fixed top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement1}`} />
-      <div className={`fixed bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement2}`} />
+      <div className={`fixed bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement2}`} />  
 
       {/* Theme Toggle Button */}
       <div className="absolute top-6 right-6 z-50">
