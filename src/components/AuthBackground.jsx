@@ -1,9 +1,14 @@
+
+
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
 import React, { useState, useRef, useEffect } from "react";
-// Three.js Background for Auth Pages
+import { useTheme } from "../context/ThemeContext";
+
+// Three.js Background for Auth Pages with theme support
 const AuthBackground = ({ type = "login" }) => {
   const mountRef = useRef(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -25,6 +30,32 @@ const AuthBackground = ({ type = "login" }) => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountRef.current.appendChild(renderer.domElement);
 
+    // Theme-based color schemes
+    const getColors = () => {
+      if (theme === 'dark') {
+        // Dark theme colors
+        return type === "login" 
+          ? [0x8b5cf6, 0x3b82f6, 0x6366f1, 0xec4899] // Purple/Blue/Pink for login
+          : [0x10b981, 0x06b6d4, 0x8b5cf6, 0xf59e0b]; // Green/Cyan/Purple/Amber for register
+      } else {
+        // Light theme colors (slightly different hues)
+        return type === "login" 
+          ? [0x7c3aed, 0x2563eb, 0x4f46e5, 0xdb2777] // Brighter versions for light theme
+          : [0x059669, 0x0891b2, 0x7c3aed, 0xd97706]; // Brighter versions for light theme
+      }
+    };
+
+    const getParticleHue = () => {
+      if (theme === 'dark') {
+        return type === "login" ? 0.7 : 0.3;
+      } else {
+        return type === "login" ? 0.65 : 0.25; // Slightly adjusted for light theme
+      }
+    };
+
+    const colors = getColors();
+    const baseHue = getParticleHue();
+
     // Create floating geometric shapes
     const geometries = [
       new THREE.OctahedronGeometry(1, 0),
@@ -32,11 +63,6 @@ const AuthBackground = ({ type = "login" }) => {
       new THREE.IcosahedronGeometry(1, 0),
       new THREE.TorusKnotGeometry(1, 0.3, 100, 16),
     ];
-
-    const colors =
-      type === "login"
-        ? [0x8b5cf6, 0x3b82f6, 0x6366f1, 0xec4899]
-        : [0x10b981, 0x06b6d4, 0x8b5cf6, 0xf59e0b];
 
     const shapes = [];
     const shapeCount = 8;
@@ -46,11 +72,11 @@ const AuthBackground = ({ type = "login" }) => {
       const material = new THREE.MeshStandardMaterial({
         color: colors[i % colors.length],
         emissive: colors[i % colors.length],
-        emissiveIntensity: 0.2,
-        metalness: 0.7,
-        roughness: 0.2,
+        emissiveIntensity: theme === 'dark' ? 0.3 : 0.1, // Less emissive in light theme
+        metalness: theme === 'dark' ? 0.7 : 0.5, // Less metallic in light theme
+        roughness: theme === 'dark' ? 0.2 : 0.4, // More rough in light theme
         transparent: true,
-        opacity: 0.6,
+        opacity: theme === 'dark' ? 0.6 : 0.4, // More transparent in light theme
       });
 
       const shape = new THREE.Mesh(geometry, material);
@@ -73,7 +99,7 @@ const AuthBackground = ({ type = "login" }) => {
 
     // Create particle system
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 1500;
+    const particlesCount = theme === 'dark' ? 1500 : 1200; // Fewer particles in light theme
     const posArray = new Float32Array(particlesCount * 3);
     const colorArray = new Float32Array(particlesCount * 3);
 
@@ -83,11 +109,13 @@ const AuthBackground = ({ type = "login" }) => {
       posArray[i + 2] = (Math.random() - 0.5) * 40;
 
       const color = new THREE.Color();
-      const hue =
-        type === "login"
-          ? 0.7 + Math.random() * 0.2
-          : 0.3 + Math.random() * 0.2;
-      color.setHSL(hue, 0.8, 0.6 + Math.random() * 0.3);
+      const hue = baseHue + Math.random() * 0.2;
+      const saturation = theme === 'dark' ? 0.8 : 0.7; // Less saturation in light theme
+      const lightness = theme === 'dark' 
+        ? 0.6 + Math.random() * 0.3 
+        : 0.5 + Math.random() * 0.3; // Darker in light theme
+      
+      color.setHSL(hue, saturation, lightness);
       colorArray[i] = color.r;
       colorArray[i + 1] = color.g;
       colorArray[i + 2] = color.b;
@@ -103,10 +131,10 @@ const AuthBackground = ({ type = "login" }) => {
     );
 
     const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.03,
+      size: theme === 'dark' ? 0.03 : 0.02, // Smaller particles in light theme
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: theme === 'dark' ? 0.8 : 0.6, // More transparent in light theme
       blending: THREE.AdditiveBlending,
       sizeAttenuation: true,
     });
@@ -117,17 +145,23 @@ const AuthBackground = ({ type = "login" }) => {
     );
     scene.add(particlesMesh);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Lighting - adjusted for theme
+    const ambientLight = new THREE.AmbientLight(
+      0xffffff, 
+      theme === 'dark' ? 0.5 : 0.7 // Brighter ambient in light theme
+    );
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const directionalLight = new THREE.DirectionalLight(
+      0xffffff, 
+      theme === 'dark' ? 0.8 : 0.6 // Softer directional in light theme
+    );
     directionalLight.position.set(10, 10, 5);
     scene.add(directionalLight);
 
     const pointLight = new THREE.PointLight(
       type === "login" ? 0x8b5cf6 : 0x10b981,
-      0.5,
+      theme === 'dark' ? 0.5 : 0.3, // Dimmer point light in light theme
       50
     );
     pointLight.position.set(0, 5, 10);
@@ -150,8 +184,8 @@ const AuthBackground = ({ type = "login" }) => {
         shape.position.x += Math.cos(time * 1.5 + i) * 0.008;
       });
 
-      particlesMesh.rotation.y += 0.0003;
-      particlesMesh.rotation.x += 0.00015;
+      particlesMesh.rotation.y += theme === 'dark' ? 0.0003 : 0.0002; // Slower rotation in light theme
+      particlesMesh.rotation.x += theme === 'dark' ? 0.00015 : 0.0001;
 
       renderer.render(scene, camera);
     };
@@ -170,11 +204,18 @@ const AuthBackground = ({ type = "login" }) => {
       window.removeEventListener("resize", handleResize);
       mountRef.current?.removeChild(renderer.domElement);
       renderer.dispose();
+      // Dispose geometries and materials
+      geometries.forEach(geom => geom.dispose());
+      shapes.forEach(shape => {
+        shape.geometry.dispose();
+        shape.material.dispose();
+      });
+      particlesGeometry.dispose();
+      particlesMaterial.dispose();
     };
-  }, [type]);
+  }, [type, theme]); // Re-run when type or theme changes
 
   return <div ref={mountRef} className="fixed inset-0 -z-10" />;
 };
-
 
 export default AuthBackground;

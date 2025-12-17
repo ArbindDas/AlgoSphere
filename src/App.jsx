@@ -1,22 +1,19 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import "./index.css";
 import ModernNavbar from "./components/ModernNavbar/ModernNavbar";
 import AppRoutes from "./routes";
+import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   return (
-    <Router>
-      <ModernNavbar />
+    <ThemeProvider>
+      <Router>
+        <ModernNavbar />
 
-      
-      
-      <AppRoutes/>
-    </Router>
+        <AppRoutes />
+      </Router>
+    </ThemeProvider>
   );
 }
 

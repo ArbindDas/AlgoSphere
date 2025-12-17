@@ -1,18 +1,36 @@
+
+
 import React from "react";
 import { motion } from "framer-motion";
 import AuthBackground from "../../../components/AuthBackground";
 import SignupForm from "./components/SignupForm";
 import BenefitsSection from "./components/BenefitsSection";
+import { useTheme } from "../../../context/ThemeContext";
 
 export const SignupPage = () => {
+  const { theme } = useTheme();
+
+  // Theme-based styles
+  const pageBg = theme === 'dark'
+    ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800'
+    : 'bg-gradient-to-br from-emerald-50 via-white to-cyan-50';
+
+  const floatingElement1 = theme === 'dark'
+    ? 'bg-emerald-900/5'
+    : 'bg-emerald-300/10';
+
+  const floatingElement2 = theme === 'dark'
+    ? 'bg-cyan-900/5'
+    : 'bg-cyan-300/10';
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-cyan-50 relative overflow-hidden">
+    <div className={`min-h-screen relative overflow-hidden ${pageBg}`}>
       {/* Background */}
       <AuthBackground type="signup" />
       
       {/* Floating Elements */}
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-emerald-300/10 rounded-full blur-3xl" />
-      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-cyan-300/10 rounded-full blur-3xl" />
+      <div className={`fixed top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement1}`} />
+      <div className={`fixed bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement2}`} />
 
       {/* Main content with navbar padding */}
       <div className="relative pt-28 pb-20 px-4">

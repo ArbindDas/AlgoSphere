@@ -1,8 +1,9 @@
 
+
+
 import { motion } from "framer-motion";
-// import ProductCategoryCard from "./ProductCategoryCard";
-import ProductCategoryCard from "../ProductCategoryCard"
-// make sure categories is imported or defined
+import { useTheme } from "../../context/ThemeContext";
+import ProductCategoryCard from "../ProductCategoryCard";
 import {
   Smartphone,
   User,
@@ -12,7 +13,12 @@ import {
   Book,
 } from "lucide-react";
 
-const categories = [
+const CategoriesSection = ({ theme: propTheme }) => {
+  // Use context if available, otherwise use prop
+  const themeContext = useTheme();
+  const theme = propTheme || (themeContext?.theme || 'light');
+
+  const categories = [
     {
       icon: <Smartphone className="text-white" size={24} />,
       title: "Electronics",
@@ -51,7 +57,6 @@ const categories = [
     }
   ];
 
-const CategoriesSection = () => {
   return (
     <>
       {/* Categories Section */}
@@ -64,14 +69,18 @@ const CategoriesSection = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${
+              theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+            }`}>
               Shop by{" "}
-              <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Category
               </span>
             </h2>
 
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className={`text-xl max-w-2xl mx-auto ${
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+            }`}>
               Browse through thousands of products in our curated categories
             </p>
           </motion.div>
@@ -81,6 +90,7 @@ const CategoriesSection = () => {
               <ProductCategoryCard
                 key={category.id ?? index}
                 delay={index * 0.1}
+                theme={theme}
                 {...category}
               />
             ))}

@@ -1,7 +1,10 @@
+
+
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ProductCard from "../ProductCard"
+import ProductCard from "../ProductCard";
+import { useTheme } from "../../context/ThemeContext";
 
 const featuredProducts = [
   {
@@ -68,9 +71,27 @@ const featuredProducts = [
 
 const FeaturedProducts = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+
+  // Define theme-based styles
+  const sectionBg = theme === 'dark' 
+    ? 'bg-gradient-to-b from-gray-900 to-gray-800/30' 
+    : 'bg-gradient-to-b from-white to-blue-50/30';
+
+  const badgeBg = theme === 'dark'
+    ? 'bg-gray-800/80 border-gray-700'
+    : 'bg-white/80 border-gray-200';
+
+  const titleColor = theme === 'dark'
+    ? 'text-gray-100'
+    : 'text-gray-800';
+
+  const descriptionColor = theme === 'dark'
+    ? 'text-gray-300'
+    : 'text-gray-600';
 
   return (
-    <section className="relative py-20 px-6 bg-gradient-to-b from-white to-blue-50/30">
+    <section className={`relative py-20 px-6 ${sectionBg}`}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -79,21 +100,21 @@ const FeaturedProducts = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-white/80 backdrop-blur-xl border border-gray-200 shadow-sm">
+          <div className={`inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full ${badgeBg} backdrop-blur-xl border shadow-sm`}>
             <TrendingUp size={16} className="text-blue-500" />
             <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-semibold">
               TRENDING PRODUCTS
             </span>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+          <h2 className={`text-4xl md:text-5xl font-bold ${titleColor} mb-6`}>
             Featured{" "}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Products
             </span>
           </h2>
 
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className={`text-xl ${descriptionColor} max-w-2xl mx-auto`}>
             Curated selection based on customer preferences and trends
           </p>
         </motion.div>
@@ -104,6 +125,7 @@ const FeaturedProducts = () => {
               key={product.title}
               delay={index * 0.1}
               {...product}
+              theme={theme} // Pass theme to ProductCard if it needs it
             />
           ))}
         </div>

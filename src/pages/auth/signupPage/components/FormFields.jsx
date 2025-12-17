@@ -1,8 +1,12 @@
+
+
+
 import React from "react";
 import { motion } from "framer-motion";
 import FloatingInput from "../../../../components/FloatingInput";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
 import { User, Mail, Lock } from "lucide-react";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const FormFields = ({
   formData,
@@ -19,6 +23,17 @@ const FormFields = ({
   onTogglePassword,
   onToggleConfirmPassword,
 }) => {
+  const { theme } = useTheme();
+
+  // Theme-based styles
+  const successTextColor = theme === 'dark'
+    ? 'text-emerald-400'
+    : 'text-emerald-600';
+
+  const feedbackBg = theme === 'dark'
+    ? 'bg-gray-800/50 text-gray-200'
+    : 'bg-white/50 text-gray-800';
+
   return (
     <>
       {/* Full Name Field */}
@@ -34,13 +49,14 @@ const FormFields = ({
           error={hasInteracted.fullName ? errors.fullName : ""}
           isValid={hasInteracted.fullName && !errors.fullName && formData.fullName.length > 0}
           required
+          theme={theme}
         />
         {/* Real-time feedback */}
         {fieldFocus.fullName && formData.fullName && !errors.fullName && (
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-emerald-600 ml-4 mt-1"
+            className={`text-xs ml-4 mt-1 ${successTextColor}`}
           >
             ✓ Valid name
           </motion.div>
@@ -60,13 +76,14 @@ const FormFields = ({
           error={hasInteracted.email ? errors.email : ""}
           isValid={hasInteracted.email && !errors.email && formData.email.length > 0}
           required
+          theme={theme}
         />
         {/* Real-time feedback */}
         {fieldFocus.email && formData.email && !errors.email && (
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-emerald-600 ml-4 mt-1"
+            className={`text-xs ml-4 mt-1 ${successTextColor}`}
           >
             ✓ Valid email format
           </motion.div>
@@ -88,12 +105,14 @@ const FormFields = ({
           showToggle
           onToggle={onTogglePassword}
           required
+          theme={theme}
         />
         
         <PasswordStrengthIndicator 
           password={formData.password}
           strength={passwordStrength}
           requirements={passwordRequirements}
+          theme={theme}
         />
       </div>
 
@@ -112,6 +131,7 @@ const FormFields = ({
           showToggle
           onToggle={onToggleConfirmPassword}
           required
+          theme={theme}
         />
         
         {/* Real-time feedback */}
@@ -119,7 +139,7 @@ const FormFields = ({
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-emerald-600 ml-4 mt-1"
+            className={`text-xs ml-4 mt-1 ${successTextColor}`}
           >
             ✓ Passwords match
           </motion.div>

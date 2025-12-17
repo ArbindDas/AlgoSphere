@@ -1,15 +1,19 @@
+
+
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 
 const FloatingActionButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { theme } = useTheme();
 
   const actions = [
-    { icon: "🚀", label: "Start Trial", color: "bg-purple-500" },
-    { icon: "💬", label: "Live Chat", color: "bg-blue-500" },
-    { icon: "📞", label: "Call Sales", color: "bg-green-500" },
-    { icon: "📊", label: "Demo", color: "bg-pink-500" },
+    { icon: "🚀", label: "Start Trial", color: "from-purple-600 to-pink-600" },
+    { icon: "💬", label: "Live Chat", color: "from-blue-600 to-cyan-600" },
+    { icon: "📞", label: "Call Sales", color: "from-green-600 to-emerald-600" },
+    { icon: "📊", label: "Demo", color: "from-pink-600 to-rose-600" },
   ];
 
   return (
@@ -29,7 +33,11 @@ const FloatingActionButton = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ delay: index * 0.1 }}
-                className={`flex items-center gap-3 ${action.color} text-white px-4 py-3 rounded-xl shadow-lg hover:shadow-xl transition-shadow`}
+                className={`flex items-center gap-3 bg-gradient-to-r ${action.color} text-white px-4 py-3 rounded-xl ${
+                  theme === 'dark'
+                    ? 'shadow-lg shadow-black/40'
+                    : 'shadow-lg shadow-purple-500/30'
+                } hover:shadow-xl transition-shadow`}
               >
                 <span className="text-xl">{action.icon}</span>
                 <span className="font-semibold">{action.label}</span>
@@ -43,7 +51,11 @@ const FloatingActionButton = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-2xl bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/40 flex items-center justify-center"
+        className={`w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center ${
+          theme === 'dark'
+            ? 'shadow-2xl shadow-purple-900/50 border border-purple-500/20'
+            : 'shadow-2xl shadow-purple-500/40 border border-white/20'
+        }`}
       >
         {isOpen ? <X size={24} /> : <Sparkles size={24} />}
       </motion.button>

@@ -1,9 +1,17 @@
+
+
+
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { useTheme } from '../../context/ThemeContext';
 
-const ShoppingGlobe = () => {
+const ShoppingGlobe = ({ theme: propTheme }) => {
   const globeCanvasRef = useRef(null);
+  
+  // Use context if available, otherwise use prop
+  const themeContext = useTheme();
+  const theme = propTheme || (themeContext?.theme || 'light');
 
   useEffect(() => {
     if (!globeCanvasRef.current) return;
@@ -25,13 +33,18 @@ const ShoppingGlobe = () => {
     controls.dampingFactor = 0.05;
     controls.rotateSpeed = 0.5;
 
+    // Theme-based colors
+    const globeColor = theme === 'dark' ? 0x10b981 : 0x059669; // Darker green for dark mode
+    const ringColor = theme === 'dark' ? 0x34d399 : 0x10b981; // Different green for ring
+    const pointsColor = theme === 'dark' ? 0xfbbf24 : 0xf59e0b; // Amber/Yellow for points
+
     const globeGeometry = new THREE.SphereGeometry(2, 64, 64);
     const globeMaterial = new THREE.MeshPhongMaterial({
-      color: 0x10b981,
+      color: globeColor,
       transparent: true,
-      opacity: 0.8,
-      shininess: 100,
-      specular: 0xffffff
+      opacity: theme === 'dark' ? 0.9 : 0.8, // Slightly more opaque in dark mode
+      shininess: theme === 'dark' ? 80 : 100, // Less shininess in dark mode
+      specular: theme === 'dark' ? 0x444444 : 0xffffff // Darker specular in dark mode
     });
     
     const globe = new THREE.Mesh(globeGeometry, globeMaterial);
@@ -39,16 +52,16 @@ const ShoppingGlobe = () => {
 
     const ringGeometry = new THREE.TorusGeometry(2.5, 0.02, 16, 100);
     const ringMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0x34d399,
+      color: ringColor,
       transparent: true,
-      opacity: 0.6
+      opacity: theme === 'dark' ? 0.7 : 0.6 // More visible in dark mode
     });
     
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
     ring.rotation.x = Math.PI / 2;
     scene.add(ring);
 
-    const pointsCount = 15;
+    const pointsCount = theme === 'dark' ? 20 : 15; // More points in dark mode
     const pointsGeometry = new THREE.BufferGeometry();
     const pointsPositions = new Float32Array(pointsCount * 3);
 
@@ -64,28 +77,39 @@ const ShoppingGlobe = () => {
 
     pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointsPositions, 3));
     const pointsMaterial = new THREE.PointsMaterial({
-      size: 0.12,
-      color: 0xfbbf24,
+      size: theme === 'dark' ? 0.15 : 0.12, // Slightly larger in dark mode
+      color: pointsColor,
       transparent: true,
-      opacity: 0.8,
+      opacity: theme === 'dark' ? 0.9 : 0.8, // More visible in dark mode
       blending: THREE.AdditiveBlending
     });
 
     const points = new THREE.Points(pointsGeometry, pointsMaterial);
     scene.add(points);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    // Adjust lighting based on theme
+    const ambientLightIntensity = theme === 'dark' ? 0.4 : 0.3;
+    const pointLightIntensity = theme === 'dark' ? 1.2 : 1;
+    
+    const ambientLight = new THREE.AmbientLight(0xffffff, ambientLightIntensity);
     scene.add(ambientLight);
     
-    const pointLight = new THREE.PointLight(0x10b981, 1, 100);
+    const pointLight = new THREE.PointLight(globeColor, pointLightIntensity, 100);
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
+
+    // Add subtle directional light for better definition in dark mode
+    if (theme === 'dark') {
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(1, 1, 1);
+      scene.add(directionalLight);
+    }
 
     let animationFrameId;
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      globe.rotation.y += 0.002;
-      ring.rotation.z += 0.001;
+      globe.rotation.y += theme === 'dark' ? 0.0015 : 0.002; // Slower rotation in dark mode
+      ring.rotation.z += theme === 'dark' ? 0.0008 : 0.001; // Slower ring rotation
       controls.update();
       renderer.render(scene, camera);
     };
@@ -105,11 +129,18 @@ const ShoppingGlobe = () => {
       cancelAnimationFrame(animationFrameId);
       renderer.dispose();
     };
-  }, []);
+  }, [theme]); // Re-run effect when theme changes
 
   return (
     <div className="fixed right-10 bottom-10 lg:right-20 lg:bottom-20 z-0">
-      <canvas ref={globeCanvasRef} className="opacity-15 hover:opacity-25 transition-opacity" />
+      <canvas 
+        ref={globeCanvasRef} 
+        className={`transition-all duration-300 ${
+          theme === 'dark' 
+            ? 'opacity-20 hover:opacity-30' 
+            : 'opacity-15 hover:opacity-25'
+        }`} 
+      />
     </div>
   );
 };

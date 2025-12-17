@@ -1,9 +1,13 @@
+
+
 import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import * as THREE from "three";
+// import { useTheme } from "../../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 
-// Three.js Background Component with light theme colors
-const ThreeBackground = () => {
+// Three.js Background Component with theme-based colors
+const ThreeBackground = ({ theme }) => {
   const mountRef = useRef(null);
 
   useEffect(() => {
@@ -22,7 +26,7 @@ const ThreeBackground = () => {
     renderer.setPixelRatio(window.devicePixelRatio);
     mountRef.current.appendChild(renderer.domElement);
 
-    // Create particle system with light theme colors
+    // Create particle system with theme-based colors
     const particlesGeometry = new THREE.BufferGeometry();
     const particlesCount = 800;
     const posArray = new Float32Array(particlesCount * 3);
@@ -38,9 +42,9 @@ const ThreeBackground = () => {
 
     const particlesMaterial = new THREE.PointsMaterial({
       size: 0.05,
-      color: "#9333ea", // Lighter purple for light theme
+      color: theme === 'dark' ? "#a855f7" : "#9333ea", // Purple color adjusted for theme
       transparent: true,
-      opacity: 0.6,
+      opacity: theme === 'dark' ? 0.3 : 0.6,
       blending: THREE.AdditiveBlending,
     });
 
@@ -74,7 +78,7 @@ const ThreeBackground = () => {
       mountRef.current?.removeChild(renderer.domElement);
       renderer.dispose();
     };
-  }, []);
+  }, [theme]);
 
   return <div ref={mountRef} className="fixed inset-0 -z-10" />;
 };
@@ -97,8 +101,16 @@ const ParallaxSection = ({ children, offset = 50 }) => {
   );
 };
 
-// Glassmorphic Card Component for light theme
-const GlassCard = ({ children, className = "", delay = 0 }) => {
+// Glassmorphic Card Component with theme support
+const GlassCard = ({ children, className = "", delay = 0, theme }) => {
+  const cardBg = theme === 'dark' 
+    ? 'bg-gray-800/90 backdrop-blur-xl border-gray-700/80'
+    : 'bg-white/90 backdrop-blur-xl border-gray-200/80';
+
+  const glowBg = theme === 'dark'
+    ? 'from-purple-900/20 to-pink-900/20'
+    : 'from-purple-100/80 to-pink-100/80';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -108,8 +120,8 @@ const GlassCard = ({ children, className = "", delay = 0 }) => {
       whileHover={{ y: -8, transition: { duration: 0.3 } }}
       className={`relative group ${className}`}
     >
-      <div className="absolute inset-0 bg-linear-to-br from-purple-100/80 to-pink-100/80 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
-      <div className="relative bg-white/90 backdrop-blur-xl border border-gray-200/80 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+      <div className={`absolute inset-0 bg-linear-to-br ${glowBg} rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500`} />
+      <div className={`relative ${cardBg} rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500`}>
         {children}
       </div>
     </motion.div>
@@ -117,7 +129,7 @@ const GlassCard = ({ children, className = "", delay = 0 }) => {
 };
 
 // Stat Counter Component
-const StatCounter = ({ end, label, suffix = "", duration = 2 }) => {
+const StatCounter = ({ end, label, suffix = "", duration = 2, theme }) => {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -154,34 +166,48 @@ const StatCounter = ({ end, label, suffix = "", duration = 2 }) => {
     requestAnimationFrame(step);
   }, [isVisible, end, duration]);
 
+  const labelColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
+
   return (
     <div ref={ref} className="text-center">
       <div className="text-5xl md:text-6xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
         {count}
         {suffix}
       </div>
-      <div className="text-gray-600 text-lg">{label}</div>
+      <div className={`text-lg ${labelColor}`}>{label}</div>
     </div>
   );
 };
 
 // Feature Card Component
-const FeatureCard = ({ icon, title, description, delay = 0 }) => {
+const FeatureCard = ({ icon, title, description, delay = 0, theme }) => {
+  const titleColor = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+  const descColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
+
   return (
-    <GlassCard delay={delay}>
+    <GlassCard delay={delay} theme={theme}>
       <div className="p-8 md:p-10">
         <div className="w-16 h-16 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 text-3xl text-white shadow-lg shadow-purple-200">
           {icon}
         </div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">{title}</h3>
-        <p className="text-gray-600 leading-relaxed text-lg">{description}</p>
+        <h3 className={`text-2xl font-bold mb-4 ${titleColor}`}>{title}</h3>
+        <p className={`leading-relaxed text-lg ${descColor}`}>{description}</p>
       </div>
     </GlassCard>
   );
 };
 
 // Category Card Component
-const CategoryCard = ({ name, icon, delay = 0 }) => {
+const CategoryCard = ({ name, icon, delay = 0, theme }) => {
+  const bgColor = theme === 'dark' 
+    ? 'bg-gray-800 border-gray-700 hover:border-purple-500'
+    : 'bg-white border-gray-200 hover:border-purple-300';
+
+  const titleColor = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+  const hoverGlow = theme === 'dark'
+    ? 'from-purple-900/30 to-pink-900/30'
+    : 'from-purple-200 to-pink-200';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -191,16 +217,16 @@ const CategoryCard = ({ name, icon, delay = 0 }) => {
       className="group cursor-pointer"
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-linear-to-br from-purple-200 to-pink-200 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-all duration-500" />
-        <div className="relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-purple-300 transition-all duration-500 shadow-lg hover:shadow-xl">
+        <div className={`absolute inset-0 bg-linear-to-br ${hoverGlow} rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-all duration-500`} />
+        <div className={`relative ${bgColor} rounded-2xl p-8 transition-all duration-500 shadow-lg hover:shadow-xl`}>
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-4xl text-white shadow-lg">
             {icon}
           </div>
-          <h3 className="text-xl font-bold text-gray-800 text-center mb-2">
+          <h3 className={`text-xl font-bold text-center mb-2 ${titleColor}`}>
             {name}
           </h3>
           <div className="flex justify-center mt-4">
-            <span className="text-sm text-purple-600 font-medium hover:text-purple-700 transition-colors">
+            <span className={`text-sm font-medium hover:text-purple-700 transition-colors ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600'}`}>
               Explore Products →
             </span>
           </div>
@@ -211,31 +237,40 @@ const CategoryCard = ({ name, icon, delay = 0 }) => {
 };
 
 // Security Badge Component
-const SecurityBadge = ({ title, description, delay = 0 }) => {
+const SecurityBadge = ({ title, description, delay = 0, theme }) => {
+  const bgColor = theme === 'dark'
+    ? 'bg-gray-800/50 border-gray-700'
+    : 'bg-white border-gray-200';
+
+  const titleColor = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+  const descColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
+  const iconBg = theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100';
+  const iconColor = theme === 'dark' ? 'text-green-400' : 'text-green-600';
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
+      className={`${bgColor} rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300`}
     >
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}>
+          <svg className={`w-6 h-6 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
         </div>
         <div>
-          <h4 className="text-lg font-bold text-gray-800 mb-2">{title}</h4>
-          <p className="text-gray-600">{description}</p>
+          <h4 className={`text-lg font-bold mb-2 ${titleColor}`}>{title}</h4>
+          <p className={descColor}>{description}</p>
         </div>
       </div>
     </motion.div>
   );
 };
 
-// Main About Component - Light Theme
+// Main About Component with ThemeContext
 const About = () => {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -243,10 +278,42 @@ const About = () => {
     damping: 30,
     restDelta: 0.001,
   });
+  const { theme } = useTheme();
+
+  // Theme-based styles
+  const pageBg = theme === 'dark'
+    ? 'bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800'
+    : 'bg-gradient-to-b from-gray-50 via-white to-gray-50';
+
+  const textColor = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+  const subtitleColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
+
+  const badgeBg = theme === 'dark'
+    ? 'bg-gray-800/80 backdrop-blur-xl border-gray-700'
+    : 'bg-white/80 backdrop-blur-xl border-gray-300';
+
+  const badgeText = theme === 'dark' ? 'text-purple-400' : 'text-purple-600';
+
+  const featuresBg = theme === 'dark'
+    ? 'bg-gradient-to-b from-transparent via-gray-800/50 to-transparent'
+    : 'bg-gradient-to-b from-transparent via-purple-50/50 to-transparent';
+
+  const ctaButton = theme === 'dark'
+    ? 'bg-white text-gray-900 hover:bg-gray-100 border-gray-600 hover:border-purple-500'
+    : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-50 hover:border-purple-300';
+
+  const secureSectionBg = theme === 'dark'
+    ? 'bg-gray-800/50 border-gray-700'
+    : 'bg-white border-gray-200';
+
+  const secureSectionGlow = theme === 'dark'
+    ? 'from-purple-900/20 to-pink-900/20'
+    : 'from-purple-200 to-pink-200';
+
+  const listTextColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-700';
 
   return (
-    <div className="min-h-screen 
-     from-gray-50 via-white to-gray-50 text-gray-800 relative overflow-hidden">
+    <div className={`min-h-screen ${pageBg} ${textColor} relative overflow-hidden`}>
       {/* Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-linear-to-r from-purple-500 to-pink-500 origin-left z-50"
@@ -254,7 +321,7 @@ const About = () => {
       />
 
       {/* Three.js Background */}
-      <ThreeBackground />
+      <ThreeBackground theme={theme} />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20">
@@ -269,9 +336,9 @@ const About = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="inline-block mb-6 px-6 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-gray-300 shadow-sm"
+              className={`inline-block mb-6 px-6 py-2 rounded-full ${badgeBg} shadow-sm`}
             >
-              <span className="text-purple-600 font-medium">WELCOME TO SMART SHOP</span>
+              <span className={`font-medium ${badgeText}`}>WELCOME TO SMART SHOP</span>
             </motion.div>
 
             <motion.h1
@@ -291,7 +358,7 @@ const About = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+              className={`text-xl md:text-2xl ${subtitleColor} max-w-3xl mx-auto leading-relaxed`}
             >
               Your trusted destination for AI-powered shopping recommendations, 
               100% secure payments, and a seamless buying experience
@@ -304,9 +371,9 @@ const About = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="grid grid-cols-3 gap-8 md:gap-16 max-w-4xl mx-auto mt-20"
             >
-              <StatCounter end={500} suffix="K+" label="Happy Customers" />
-              <StatCounter end={100} suffix="K+" label="Products" />
-              <StatCounter end={99} suffix="%" label="Secure Transactions" />
+              <StatCounter end={500} suffix="K+" label="Happy Customers" theme={theme} />
+              <StatCounter end={100} suffix="K+" label="Products" theme={theme} />
+              <StatCounter end={99} suffix="%" label="Secure Transactions" theme={theme} />
             </motion.div>
           </motion.div>
         </div>
@@ -322,13 +389,13 @@ const About = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <div className="inline-block mb-6 px-6 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-gray-300 shadow-sm">
-              <span className="text-purple-600 font-medium">SHOP BY CATEGORY</span>
+            <div className={`inline-block mb-6 px-6 py-2 rounded-full ${badgeBg} shadow-sm`}>
+              <span className={`font-medium ${badgeText}`}>SHOP BY CATEGORY</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${textColor}`}>
               Discover Amazing Products
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className={`text-xl ${subtitleColor} max-w-2xl mx-auto`}>
               AI-powered recommendations help you find exactly what you need
             </p>
           </motion.div>
@@ -338,48 +405,56 @@ const About = () => {
               name="Electronics"
               icon="📱"
               delay={0}
+              theme={theme}
             />
             <CategoryCard
               name="Fashion"
               icon="👕"
               delay={0.1}
+              theme={theme}
             />
             <CategoryCard
               name="Home & Living"
               icon="🏠"
               delay={0.2}
+              theme={theme}
             />
             <CategoryCard
               name="Beauty"
               icon="💄"
               delay={0.3}
+              theme={theme}
             />
             <CategoryCard
               name="Fitness"
               icon="💪"
               delay={0.4}
+              theme={theme}
             />
             <CategoryCard
               name="Books"
               icon="📚"
               delay={0.5}
+              theme={theme}
             />
             <CategoryCard
               name="Toys & Games"
               icon="🎮"
               delay={0.6}
+              theme={theme}
             />
             <CategoryCard
               name="Groceries"
               icon="🛒"
               delay={0.7}
+              theme={theme}
             />
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="relative py-32 px-6 bg-linear-to-b from-transparent via-purple-50/50 to-transparent">
+      <section className={`relative py-32 px-6 ${featuresBg}`}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -388,13 +463,13 @@ const About = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <div className="inline-block mb-6 px-6 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-gray-300 shadow-sm">
-              <span className="text-purple-600 font-medium">WHY CHOOSE US</span>
+            <div className={`inline-block mb-6 px-6 py-2 rounded-full ${badgeBg} shadow-sm`}>
+              <span className={`font-medium ${badgeText}`}>WHY CHOOSE US</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${textColor}`}>
               Your Safe & Smart Shopping Partner
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className={`text-xl ${subtitleColor} max-w-2xl mx-auto`}>
               We prioritize your security and satisfaction above everything else
             </p>
           </motion.div>
@@ -405,36 +480,42 @@ const About = () => {
               title="AI Shopping Assistant"
               description="Our intelligent AI learns your preferences to suggest products you'll love, making shopping effortless and personalized."
               delay={0}
+              theme={theme}
             />
             <FeatureCard
               icon="🔒"
               title="100% Secure Payments"
               description="Shop with confidence using bank-grade encryption, secure payment gateways, and buyer protection on every transaction."
               delay={0.1}
+              theme={theme}
             />
             <FeatureCard
               icon="🚚"
               title="Fast & Free Shipping"
               description="Enjoy free shipping on orders above $50 and guaranteed delivery times with real-time tracking for all shipments."
               delay={0.2}
+              theme={theme}
             />
             <FeatureCard
               icon="💬"
               title="24/7 Customer Support"
               description="Our support team is always ready to help via chat, phone, or email. Average response time: under 5 minutes."
               delay={0.3}
+              theme={theme}
             />
             <FeatureCard
               icon="↩️"
               title="Easy Returns"
               description="Not satisfied? Return any item within 30 days for a full refund. Simple, hassle-free returns process."
               delay={0.4}
+              theme={theme}
             />
             <FeatureCard
               icon="⭐"
               title="Verified Reviews"
               description="Read authentic reviews from verified buyers to make informed decisions about products before purchasing."
               delay={0.5}
+              theme={theme}
             />
           </div>
         </div>
@@ -451,19 +532,19 @@ const About = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
-                <div className="inline-block mb-6 px-6 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-gray-300 shadow-sm">
-                  <span className="text-purple-600 font-medium">
+                <div className={`inline-block mb-6 px-6 py-2 rounded-full ${badgeBg} shadow-sm`}>
+                  <span className={`font-medium ${badgeText}`}>
                     YOUR SECURITY IS OUR PRIORITY
                   </span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight text-gray-800">
+                <h2 className={`text-4xl md:text-5xl font-bold mb-8 leading-tight ${textColor}`}>
                   Shop With Complete
                   <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     {" "}
                     Peace of Mind
                   </span>
                 </h2>
-                <p className="text-lg text-gray-600 leading-relaxed mb-6">
+                <p className={`text-lg ${subtitleColor} leading-relaxed mb-6`}>
                   We understand that online security is your biggest concern. 
                   That's why we've implemented multiple layers of protection to 
                   ensure your shopping experience is completely safe.
@@ -473,25 +554,29 @@ const About = () => {
                   <SecurityBadge
                     title="SSL Encryption"
                     description="All data transmitted is secured with 256-bit SSL encryption"
+                    theme={theme}
                   />
                   <SecurityBadge
                     title="PCI DSS Compliant"
                     description="Fully compliant with Payment Card Industry Data Security Standards"
+                    theme={theme}
                   />
                   <SecurityBadge
                     title="Fraud Protection"
                     description="Advanced fraud detection systems monitor all transactions"
+                    theme={theme}
                   />
                   <SecurityBadge
                     title="Privacy First"
                     description="We never share your personal information with third parties"
+                    theme={theme}
                   />
                 </div>
                 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300"
+                  className="px-8 py-4 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Shop Securely Now
                 </motion.button>
@@ -506,15 +591,15 @@ const About = () => {
                 transition={{ duration: 0.8 }}
                 className="relative"
               >
-                <div className="absolute inset-0 bg-linear-to-br from-purple-200 to-pink-200 rounded-3xl blur-3xl opacity-50" />
-                <div className="relative aspect-square rounded-3xl bg-white border border-gray-200 overflow-hidden shadow-xl">
+                <div className={`absolute inset-0 bg-linear-to-br ${secureSectionGlow} rounded-3xl blur-3xl opacity-50`} />
+                <div className={`relative aspect-square rounded-3xl ${secureSectionBg} overflow-hidden shadow-xl`}>
                   <div className="absolute inset-0 bg-linear-to-br from-purple-100/40 to-pink-100/40" />
                   <div className="p-10 h-full flex flex-col justify-center">
                     <div className="text-center mb-8">
                       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center text-4xl text-white shadow-lg">
                         🔒
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                      <h3 className={`text-2xl font-bold mb-4 ${textColor}`}>
                         Protected Shopping Experience
                       </h3>
                     </div>
@@ -528,12 +613,12 @@ const About = () => {
                         "24/7 security monitoring"
                       ].map((item, index) => (
                         <div key={index} className="flex items-center gap-3">
-                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100'}`}>
+                            <svg className={`w-4 h-4 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           </div>
-                          <span className="text-gray-700">{item}</span>
+                          <span className={listTextColor}>{item}</span>
                         </div>
                       ))}
                     </div>
@@ -555,30 +640,30 @@ const About = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <div className="inline-block mb-6 px-6 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-gray-300 shadow-sm">
-              <span className="text-purple-600 font-medium">HAPPY CUSTOMERS</span>
+            <div className={`inline-block mb-6 px-6 py-2 rounded-full ${badgeBg} shadow-sm`}>
+              <span className={`font-medium ${badgeText}`}>HAPPY CUSTOMERS</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${textColor}`}>
               Loved by Shoppers Worldwide
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className={`text-xl ${subtitleColor} max-w-2xl mx-auto`}>
               See what our customers have to say about their shopping experience
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <GlassCard>
+            <GlassCard theme={theme}>
               <div className="p-8">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                     SJ
                   </div>
                   <div className="ml-4">
-                    <h4 className="font-bold text-gray-800">Sarah Johnson</h4>
-                    <p className="text-purple-600 text-sm">Verified Buyer</p>
+                    <h4 className={`font-bold ${textColor}`}>Sarah Johnson</h4>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>Verified Buyer</p>
                   </div>
                 </div>
-                <p className="text-gray-600 italic">
+                <p className={`${subtitleColor} italic`}>
                   "The AI recommendations are spot on! Found products I didn't even know I needed. Shopping has never been this easy and secure."
                 </p>
                 <div className="flex mt-4">
@@ -591,18 +676,18 @@ const About = () => {
               </div>
             </GlassCard>
 
-            <GlassCard delay={0.1}>
+            <GlassCard delay={0.1} theme={theme}>
               <div className="p-8">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                     MR
                   </div>
                   <div className="ml-4">
-                    <h4 className="font-bold text-gray-800">Michael Rodriguez</h4>
-                    <p className="text-purple-600 text-sm">Premium Member</p>
+                    <h4 className={`font-bold ${textColor}`}>Michael Rodriguez</h4>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>Premium Member</p>
                   </div>
                 </div>
-                <p className="text-gray-600 italic">
+                <p className={`${subtitleColor} italic`}>
                   "As someone concerned about online security, I appreciate their transparent security measures. My payment information has never felt safer."
                 </p>
                 <div className="flex mt-4">
@@ -615,18 +700,18 @@ const About = () => {
               </div>
             </GlassCard>
 
-            <GlassCard delay={0.2}>
+            <GlassCard delay={0.2} theme={theme}>
               <div className="p-8">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                     EP
                   </div>
                   <div className="ml-4">
-                    <h4 className="font-bold text-gray-800">Emma Patel</h4>
-                    <p className="text-purple-600 text-sm">Frequent Shopper</p>
+                    <h4 className={`font-bold ${textColor}`}>Emma Patel</h4>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>Frequent Shopper</p>
                   </div>
                 </div>
-                <p className="text-gray-600 italic">
+                <p className={`${subtitleColor} italic`}>
                   "The 30-day return policy gives me confidence to try new products. Customer service is responsive and actually helpful!"
                 </p>
                 <div className="flex mt-4">
@@ -645,31 +730,31 @@ const About = () => {
       {/* CTA Section */}
       <section className="relative py-32 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <GlassCard>
+          <GlassCard theme={theme}>
             <div className="p-12 md:p-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+              <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${textColor}`}>
                 Ready to Shop Smart?
               </h2>
-              <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+              <p className={`text-xl ${subtitleColor} mb-10 max-w-2xl mx-auto`}>
                 Join 500,000+ happy customers who trust us for safe, smart, and satisfying shopping
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-10 py-5 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300"
+                  className="px-10 py-5 rounded-xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Start Shopping Now
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-10 py-5 rounded-xl bg-white border border-gray-300 text-gray-800 font-semibold text-lg hover:bg-gray-50 hover:border-purple-300 transition-all duration-300 shadow-sm hover:shadow-md"
+                  className={`px-10 py-5 rounded-xl font-semibold text-lg transition-all duration-300 shadow-sm hover:shadow-md ${ctaButton}`}
                 >
                   Explore Categories
                 </motion.button>
               </div>
-              <p className="mt-8 text-sm text-gray-500">
+              <p className={`mt-8 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 <svg className="w-5 h-5 inline-block mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>

@@ -1,8 +1,13 @@
+
+
 import React from "react";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const BenefitsSection = () => {
+  const { theme } = useTheme();
+  
   const benefits = [
     {
       icon: "🤖",
@@ -33,6 +38,43 @@ const BenefitsSection = () => {
     { value: "24/7", label: "Support" },
   ];
 
+  // Theme-based styles
+  const badgeBg = theme === 'dark'
+    ? 'bg-gray-800/80 backdrop-blur-xl border-gray-700/40'
+    : 'bg-white/80 backdrop-blur-xl border-white/40';
+
+  const titleColor = theme === 'dark'
+    ? 'text-gray-100'
+    : 'text-gray-800';
+
+  const descriptionColor = theme === 'dark'
+    ? 'text-gray-300'
+    : 'text-gray-600';
+
+  const benefitCardBg = theme === 'dark'
+    ? 'bg-gray-800/50 hover:bg-gray-800/80 backdrop-blur-sm'
+    : 'bg-white/50 hover:bg-white/80 backdrop-blur-sm';
+
+  const benefitTitleColor = theme === 'dark'
+    ? 'text-gray-100'
+    : 'text-gray-800';
+
+  const benefitDescColor = theme === 'dark'
+    ? 'text-gray-400'
+    : 'text-gray-600';
+
+  const statCardBg = theme === 'dark'
+    ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700'
+    : 'bg-gradient-to-br from-white to-emerald-50 border-emerald-100';
+
+  const statValueColor = theme === 'dark'
+    ? 'text-emerald-400'
+    : 'text-emerald-700';
+
+  const statLabelColor = theme === 'dark'
+    ? 'text-gray-400'
+    : 'text-gray-600';
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -46,7 +88,7 @@ const BenefitsSection = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3, type: "spring" }}
-            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg"
+            className={`inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full backdrop-blur-xl border shadow-lg ${badgeBg}`}
           >
             <Sparkles className="w-4 h-4 text-emerald-500" />
             <span className="bg-linear-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent font-bold text-sm">
@@ -54,14 +96,14 @@ const BenefitsSection = () => {
             </span>
           </motion.div>
 
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className={`text-4xl font-bold mb-4 ${titleColor}`}>
             Start Your
             <span className="block bg-linear-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
               AI Shopping Journey
             </span>
           </h1>
 
-          <p className="text-gray-600 mb-6">
+          <p className={`mb-6 ${descriptionColor}`}>
             Get personalized recommendations, exclusive deals, and premium
             features designed to transform your shopping experience.
           </p>
@@ -75,14 +117,14 @@ const BenefitsSection = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + index * 0.1 }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-colors"
+              className={`flex items-center gap-3 p-3 rounded-xl backdrop-blur-sm transition-colors ${benefitCardBg}`}
             >
               <div className="text-xl">{benefit.icon}</div>
               <div>
-                <h4 className="font-semibold text-gray-800 text-sm">
+                <h4 className={`font-semibold text-sm ${benefitTitleColor}`}>
                   {benefit.title}
                 </h4>
-                <p className="text-xs text-gray-600">{benefit.desc}</p>
+                <p className={`text-xs ${benefitDescColor}`}>{benefit.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -96,12 +138,12 @@ const BenefitsSection = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8 + index * 0.1 }}
-              className="text-center p-3 rounded-xl bg-linear-to-br from-white to-emerald-50 border border-emerald-100"
+              className={`text-center p-3 rounded-xl border ${statCardBg}`}
             >
-              <div className="text-base font-bold text-emerald-700">
+              <div className={`text-base font-bold ${statValueColor}`}>
                 {stat.value}
               </div>
-              <div className="text-xs text-gray-600">{stat.label}</div>
+              <div className={`text-xs ${statLabelColor}`}>{stat.label}</div>
             </motion.div>
           ))}
         </div>
