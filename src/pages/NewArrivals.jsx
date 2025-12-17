@@ -270,7 +270,7 @@ const NewArrivals = () => {
     : 'text-gray-600';
 
   return (
-    <div className={`min-h-screen ${pageBg} ${textColor} relative overflow-hidden`}>
+    <div className={`min-h-screen ${pageBg} ${textColor} relative overflow-hidden pt-20 sm:pt-36 lg:pt-20 pb-15 px-4`}>
       {/* Progress Bar */}
       <ProgressBar scaleX={scaleX} theme={theme} />
 

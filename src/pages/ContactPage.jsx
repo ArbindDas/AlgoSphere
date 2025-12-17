@@ -27,7 +27,7 @@ const ContactPage = () => {
   const phrases = ["Need Help?", "Order Questions?", "Track Your Package", "Secure Shopping!"];
 
   return (
-    <div className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${
+    <div className={`relative min-h-screen overflow-hidden transition-colors duration-300 pt-20 sm:pt-36 lg:pt-20 pb-15 px-4 ${
       theme === 'dark'
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
         : 'bg-gradient-to-br from-emerald-50 via-blue-50/30 to-amber-50/20'
