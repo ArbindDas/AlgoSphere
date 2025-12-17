@@ -1,27 +1,16 @@
-
-
 import React, { useState } from 'react';
-import Navbar from '../components/ContactPage/Navbar';
-import ThreeBackground from "../components/ContactPage/ThreeBackground"
-import ShoppingGlobe from '../components/ContactPage/ShoppingGlobe';
-import ContactCards from '../components/ContactPage/ContactCards';
-import SecurityFeatures from '../components/ContactPage/SecurityFeatures';
-import ShoppingAssurance from '../components/ContactPage/ShoppingAssurance';
-import FAQSection from '../components/ContactPage/FAQSection';
-import StatsSection from '../components/ContactPage/StatsSection';
-import ContactModal from '../components/ContactPage/ContactModal';
-import Footer from '../components/ContactPage/Footer';
-import TypingEffect from '../components/ContactPage/TypingEffect';
-import { contactCards, faqItems, securityFeatures } from '../components/utils/constants';
-
-
-import { 
-  Mail, MapPin, Phone, X, Send, CheckCircle, Clock, 
-  MessageCircle, Globe, Shield, Users, Award, 
-  ChevronRight, Sparkles, Star, Zap, Globe as GlobeIcon,
-  Headphones, ShieldCheck, Truck, ShoppingBag, Package, CreditCard,
-  Shield as ShieldIcon, Lock, RefreshCw, ThumbsUp, Store, Gift
-} from 'lucide-react';
+import Navbar from '../shared/Navbar';
+import ThreeBackground from './ThreeBackground';
+import ShoppingGlobe from './ShoppingGlobe';
+import ContactCards from './ContactCards';
+import SecurityFeatures from './SecurityFeatures';
+import ShoppingAssurance from './ShoppingAssurance';
+import FAQSection from './FAQSection';
+import StatsSection from './StatsSection';
+import ContactModal from './ContactModal';
+import Footer from './Footer';
+import TypingEffect from '../shared/TypingEffect';
+import { contactCards, faqItems, securityFeatures } from '../../utils/constants';
 
 const ContactPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
