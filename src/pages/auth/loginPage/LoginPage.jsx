@@ -13,8 +13,7 @@ import {
   EyeOff,
   Mail,
   Lock,
-  Sun,
-  Moon
+
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLoginForm } from "./hooks/useLoginForm";
@@ -179,24 +178,7 @@ export const LoginPage = () => {
       <div className={`fixed top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement1}`} />
       <div className={`fixed bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl ${floatingElement2}`} />  
 
-      {/* Theme Toggle Button */}
-      <div className="absolute top-6 right-6 z-50">
-        <button
-          onClick={toggleTheme}
-          className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
-            theme === 'dark'
-              ? 'bg-gray-800 text-white hover:bg-gray-700'
-              : 'bg-white text-gray-800 hover:bg-gray-100'
-          }`}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? (
-            <Moon className="w-5 h-5" />
-          ) : (
-            <Sun className="w-5 h-5" />
-          )}
-        </button>
-      </div>
+    
 
       <div className="relative pt-28 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
