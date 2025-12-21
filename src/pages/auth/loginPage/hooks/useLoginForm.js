@@ -10,6 +10,7 @@ export const useLoginForm = (initialState = { email: "", password: "" }) => {
     email: false,
     password: false,
   });
+  
   const [hasInteracted, setHasInteracted] = useState({
     email: false,
     password: false,

@@ -86,7 +86,22 @@ export const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      const response = await authService.signin(formData.email, formData.password);
+      // const response = 
+      // await authService.signin
+      // (
+      //   formData.email,
+      //    formData.password
+      // );
+
+      // pass as object
+      const response  = await authService.signin({
+
+        email: formData.email,
+        password: formData.password
+      });
+
+
+         
       console.log("Login successful: ", response);
       setIsLoading(false);
       navigate("/dashboard");
@@ -203,14 +218,14 @@ export const LoginPage = () => {
                     }`}
                   >
                     <Sparkles className="w-5 h-5 text-emerald-500" />
-                    <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent font-bold">
+                    <span className="bg-linear-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent font-bold">
                       WELCOME BACK
                     </span>
                   </motion.div>
                   
                   <h1 className={`text-5xl font-bold mb-4 leading-tight ${headingColor}`}>
                     Secure Login to Your
-                    <span className="block bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                    <span className="block bg-linear-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
                       AI-Powered Dashboard
                     </span>
                   </h1>
@@ -274,7 +289,7 @@ export const LoginPage = () => {
               <div className="max-w-md mx-auto">
                 <div className="relative group">
                   {/* Form Glow Effect */}
-                  <div className={`absolute -inset-0.5 bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 rounded-2xl blur transition duration-1000 group-hover:duration-200 ${
+                  <div className={`absolute -inset-0.5 bg-linear-to-r from-emerald-600 via-cyan-600 to-blue-600 rounded-2xl blur transition duration-1000 group-hover:duration-200 ${
                     theme === 'dark' ? 'opacity-20' : 'opacity-30'
                   }`} />
                   
@@ -289,7 +304,7 @@ export const LoginPage = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring" }}
-                        className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-600 to-cyan-600 rounded-2xl mb-4 shadow-lg"
+                        className="inline-flex items-center justify-center w-14 h-14 bg-linear-to-br from-emerald-600 to-cyan-600 rounded-2xl mb-4 shadow-lg"
                       >
                         <Sparkles className="w-10 h-10 text-white" />
                       </motion.div>
@@ -467,7 +482,7 @@ export const LoginPage = () => {
                         whileTap={{ scale: isFormValid ? 0.98 : 1 }}
                         className={`w-full py-4 px-6 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all duration-300 ${
                           isFormValid 
-                            ? 'bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 hover:shadow-lg cursor-pointer' 
+                            ? 'bg-linear-to-r from-emerald-600 via-cyan-600 to-blue-600 hover:shadow-lg cursor-pointer' 
                             : 'cursor-not-allowed'
                         } ${isFormValid ? 'transform hover:-translate-y-0.5' : ''} ${
                           theme === 'dark'

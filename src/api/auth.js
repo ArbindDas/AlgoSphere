@@ -1,397 +1,428 @@
-
-
 import axios from "axios";
+import { em } from "framer-motion/client";
+import { error } from "three";
 
-const APP_URL = "http://localhost:8080";
+// URLs
+const API_GATEWAY_URL = "http://localhost:8765"; // API Gateway
+const KEYCLOAK_URL = "http://localhost:8080"; // Keycloak server
+const KEYCLOAK_REALM = "microservices-realm";
+const KEYCLOAK_CLIENT_ID = "spring-cloud-client";
+
+// For admin operations (signup requires admin credentials)
+const KEYCLOAK_ADMIN_USERNAME = "admin"; // Or your Keycloak admin username
+const KEYCLOAK_ADMIN_PASSWORD = "admin123"; // Or your Keycloak admin password
 
 const axiosInstance = axios.create({
-  baseURL: APP_URL,
+  baseURL: API_GATEWAY_URL,
   withCredentials: false,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Add request interceptor to automatically add token to requests
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
+// ============= SIGNUP IMPLEMENTATION =============
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+const keycloakService = {
+  /**
+   * SIGNUP: Create new user in Keycloak via api-gateway
+   */
+  signup: async ({ fullName, email, password, confirmPassword }) => {
+    try {
+      console.log("Starting signup for: ", email);
+
+      // call your api-gateway for signup
+      const response = await axiosInstance.post("/api/v1/auth/signup", {
+        fullName,
+        email,
+        password,
+        confirmPassword,
+      });
+
+      console.log("Signup successfully ", response.data);
+
+      return response.data;
+    } catch (error) {
+      console.error("Signup failed", error);
+      let erroMessage = "Registration failed .please try agaain";
+
+      if (error.response) {
+        //handle api-gateway
+        const status = error.response.status;
+        const data = error.response.data;
+
+        switch (status) {
+          case 409: // conflict
+            erroMessage = data?.message || "User already exists";
+            // data?.message → safely try to read message
+
+            // || → if that fails, use default text
+            break;
+
+          case 400: // bad request
+            erroMessage = data?.message || "Invalid registration data ";
+            break;
+
+          case 422: // validation failed
+            erroMessage = data?.message || "vallidation failed";
+            break;
+
+          case 500: // internal server errror
+            erroMessage = data?.message || "internal server error";
+            break;
+
+          default:
+            erroMessage = data?.message || `Registration failed (${status})`;
+        }
+      } else if (error.message) {
+        erroMessage = error.message;
+      }
+
+      throw new Error(erroMessage);
     }
-
-    return config;
   },
 
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
-const getToken = () => {
-  const userData = localStorage.getItem("user");
-
-  if (userData) {
+  /**
+   * SIGNIN: Login with username/email and password
+   */
+  signin: async ({email , password}) =>  {
     try {
-      const user = JSON.parse(userData); // FIXED: Was parsing string "userData" instead of variable userData
+
+      console.log("starting login for : ", email);
+
+
+      const response = await axiosInstance.post("/api/v1/auth/login", {
+
+        email,
+        password
+
+      });
+
+
+         // 🚨 NEW DEBUG: Check the token structure properly
+        if (response.data.accessToken) {
+            const token = response.data.accessToken;
+            console.log("=== TOKEN DEBUG START ===");
+            
+            // Split the token
+            const parts = token.split('.');
+            console.log("Token has", parts.length, "parts");
+            
+            if (parts.length >= 2) {
+                try {
+                    // Decode the payload (middle part)
+                    const payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+                    console.log("Decoded payload:", payload);
+                    
+                    // Parse as JSON
+                    const parsed = JSON.parse(payload);
+                    console.log("Parsed JSON - realm_access:", parsed.realm_access);
+                    console.log("Parsed JSON - ALL roles:", parsed.realm_access?.roles);
+                    console.log("Is ADMIN in token?", parsed.realm_access?.roles?.includes('ADMIN'));
+                } catch (e) {
+                    console.error("Failed to decode/parse:", e);
+                }
+            }
+            console.log("=== TOKEN DEBUG END ===");
+        }
+        
+        return response.data;
+        
+        return response.data;
+
+
+      console.log("login successed : ", response.data);
+      // return response.data;
+
       
-      // for GOOGLE OAuth users
-      if (user.authProvider === "GOOGLE") {
-        const authToken = localStorage.getItem("accessToken");
-        if (authToken) {
-          // clear regular token
-          localStorage.removeItem("token");
-          return authToken;
-        }
-      } else {
-        // for regular user
-        const regularToken = user.token || localStorage.getItem("token");
-        if (regularToken) {
-          // Clear OAuth tokens to avoid conflicts
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          return regularToken;
-        }
-      }
     } catch (error) {
-      console.error("Error parsing user data", error);
-      clearAllTokens();
-    }
-  }
+      
 
-  // If no user data, check for any token
-  const authToken = localStorage.getItem("accessToken");
-  const regularToken = localStorage.getItem("token");
+      console.error("login failed..." , error);
 
-  // If both tokens exist, clear conflict
-  if (authToken && regularToken) {
-    clearAllTokens();
-    return null;
-  }
-  
-  return regularToken || authToken; // Return whichever token exists
-};
+      let erroMessage = "login failed please try again letter";
 
-// Clear all authentication data
-const clearAllTokens = () => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-};
+      if (error.response) {
 
 
-const signup = async (fullName, email, password) => {
-  try {
-    console.log("📝 Attempting registration for:", email);
+        // handle api-gateway
 
-    const response = await axiosInstance.post("/api/v1/auth/signup", {
-      fullName,
-      email,
-      password,
-    });
+        let status = error.response.status;
+        let data = error.response.data;
 
-    console.log("✅ Registration response:", response.data);
 
-    // Check response structure - it should be ApiResponseWrapper<SignupResponse>
-    const apiResponse = response.data;
-    
-    if (!apiResponse || apiResponse.status !== 201) {
-      throw new Error(apiResponse?.message || "Registration failed");
-    }
+        switch (status) {
+          case 409: // conflic
+            erroMessage = data?.message || "user already exists";
+            break;
+            
+          case 400: // bad request
+            erroMessage = data?.message || "invalid registration data";
+            break;
+            
 
-    // Extract signup data (NOT login data - no token!)
-    const signupData = apiResponse.data; // This is SignupResponse
-    
-    console.log("📦 Signup data received:", signupData);
+          case 422: //  validation failed
+            erroMessage = data?.message|| "validation failed";
+            break;
+          
+          case 403:
+            erroMessage = data?.message || "Access denied. Please verify your account or contact support"
+            break;
 
-    // IMPORTANT: Signup does NOT return a token!
-    // Do NOT store token or user info in localStorage yet
-    // The user needs to login separately
+          case 404:
+            erroMessage = data?.message || "No account found with this email. Please sign up first."
+            break;
 
-    // You might store just the email for convenience
-    localStorage.setItem("lastRegisteredEmail", email);
-    
-    // Clear after 10 minutes
-    setTimeout(() => {
-      localStorage.removeItem("lastRegisteredEmail");
-    }, 10 * 60 * 1000);
+          case 500:
+            erroMessage = data?.message || "internal server error";
+            break;
+        
+          default:
+            erroMessage = `registration failed (${status})`
+            break;
+        }
+      }else if (error.message) {
 
-    return {
-      success: true,
-      message: apiResponse.message || "Registration successful",
-      data: signupData,
-      email: email,
-      requiresLogin: true // User needs to login separately
-    };
-
-  } catch (error) {
-    console.error("❌ Registration failed:", error);
-    
-    // Use your existing handleError function
-    handleError(error, "Registration");
-    
-    // Enhanced error handling
-    if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data;
-
-      console.error("Error status:", status);
-      console.error("Error data:", data);
-
-      let errorMessage = "Registration failed";
-
-      switch (status) {
-        case 400:
-          errorMessage = data?.message || "Invalid registration data";
-          if (data?.errors) {
-            errorMessage = Object.values(data.errors).join(", ");
-          }
-          break;
-        case 409:
-          errorMessage = "Email already exists";
-          break;
-        case 422:
-          errorMessage = data?.message || "Validation failed";
-          break;
-        case 500:
-          errorMessage = "Server error. Please try again later.";
-          break;
-        default:
-          errorMessage = data?.message || `Registration failed (${status})`;
+          erroMessage = error.message;
+        
       }
 
-      throw new Error(errorMessage);
-    } else if (error.request) {
-      throw new Error("No response from server. Check your connection.");
-    } else {
+    }
+
+    throw new error(erroMessage)
+  },
+
+  /**
+   * FORGOT PASSWORD: Initiate password reset
+   */
+  forgotPassword: async (email) => {
+    try {
+      console.log("🔑 Initiating password reset for:", email);
+
+      // Get admin token
+      const adminToken = await getKeycloakAdminToken();
+
+      // Find user by email
+      const usersResponse = await axios.get(
+        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users`,
+        {
+          params: { email: email, exact: true },
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+
+      if (usersResponse.data.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = usersResponse.data[0].id;
+
+      // Execute actions email
+      const executeActionsResponse = await axios.put(
+        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users/${userId}/execute-actions-email`,
+        ["UPDATE_PASSWORD"], // Action to execute
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+            "Content-Type": "application/json",
+          },
+          params: {
+            client_id: KEYCLOAK_CLIENT_ID,
+            lifespan: 43200, // 12 hours in minutes
+          },
+        }
+      );
+
+      return {
+        success: true,
+        message: "Password reset email sent. Please check your inbox.",
+      };
+    } catch (error) {
+      console.error("Password reset failed:", error);
+      throw new Error(
+        error.response?.data?.errorMessage || "Failed to send reset email"
+      );
+    }
+  },
+
+  /**
+   * RESEND VERIFICATION EMAIL
+   */
+  resendVerificationEmail: async (email) => {
+    try {
+      const adminToken = await getKeycloakAdminToken();
+
+      // Find user
+      const usersResponse = await axios.get(
+        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users`,
+        {
+          params: { email: email, exact: true },
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+
+      if (usersResponse.data.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = usersResponse.data[0].id;
+
+      // Send verification email
+      await axios.put(
+        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users/${userId}/send-verify-email`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+          params: {
+            client_id: KEYCLOAK_CLIENT_ID,
+          },
+        }
+      );
+
+      return {
+        success: true,
+        message: "Verification email sent successfully",
+      };
+    } catch (error) {
+      console.error("Resend verification failed:", error);
       throw error;
     }
+  },
+
+  // ... [Previous functions: isAuthenticated, getCurrentUser, logout, etc.] ...
+};
+
+// ============= HELPER FUNCTIONS =============
+
+/**
+ * Get admin token for Keycloak operations
+ */
+const getKeycloakAdminToken = async () => {
+  try {
+    // Check if we have a cached admin token
+    const cachedToken = localStorage.getItem("kc_admin_token");
+    const cachedExp = localStorage.getItem("kc_admin_token_exp");
+
+    if (cachedToken && cachedExp && Date.now() < parseInt(cachedExp)) {
+      return cachedToken;
+    }
+
+    // Get new admin token
+    const response = await axios.post(
+      `${KEYCLOAK_URL}/realms/master/protocol/openid-connect/token`,
+      new URLSearchParams({
+        client_id: "admin-cli",
+        grant_type: "password",
+        username: KEYCLOAK_ADMIN_USERNAME,
+        password: KEYCLOAK_ADMIN_PASSWORD,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    const token = response.data.access_token;
+    const expiresIn = response.data.expires_in * 1000; // Convert to milliseconds
+
+    // Cache token
+    localStorage.setItem("kc_admin_token", token);
+    localStorage.setItem("kc_admin_token_exp", Date.now() + expiresIn);
+
+    return token;
+  } catch (error) {
+    console.error("Failed to get admin token:", error);
+    throw new Error(
+      "Administrative error. Please check Keycloak admin credentials."
+    );
   }
 };
 
-const signin = async (email, password) => {
+/**
+ * Get Keycloak user ID by email
+ */
+const getKeycloakUserId = async (email, adminToken) => {
   try {
-    // Clear old auth data
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    
-    const response = await axiosInstance.post("/api/v1/auth/signin", {
-      email,
-      password,
-    });
+    const response = await axios.get(
+      `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users`,
+      {
+        params: { email: email, exact: true },
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      }
+    );
 
-    console.log("📦 Full response:", response.data);
-    
-    // Extract from nested structure
-    const apiWrapper = response.data;          // ApiResponseWrapper
-    const loginResponse = apiWrapper.data;     // LoginResponse object
-    
-    if (!loginResponse || !loginResponse.token) {
-      throw new Error("Invalid login response");
+    if (response.data.length > 0) {
+      return response.data[0].id;
     }
 
-    // ✅ PRIMARY SOURCE: Response Body
-    const token = loginResponse.token;
-    const userInfo = {
-      email: loginResponse.email,
-      token: token,
-      userId: loginResponse.userId,
-      fullName: loginResponse.fullName,
-      roles: loginResponse.roles || [],
-      tokenType: loginResponse.tokenType || "Bearer",
-      timestamp: new Date().toISOString()
-    };
-
-    // Store authentication
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userInfo));
-    
-    // Optional: Store for debugging
-    console.log("🔑 Token (from body):", token.substring(0, 20) + "...");
-    console.log("👤 User info stored:", userInfo);
-    
-    // Optional: Verify headers also have it
-    const headerToken = response.headers['x-auth-token'];
-    console.log("🔍 Token in headers too?", headerToken ? "Yes" : "No");
-
-    return {
-      success: true,
-      user: userInfo,
-      message: apiWrapper.message
-    };
-
+    throw new Error("User not found after creation");
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Failed to get user ID:", error);
     throw error;
   }
 };
 
-
-
-// Update handleError function to not throw generic errors
-const handleError = (error, operation) => {
-  if (error.response) {
-    // Server responded with error
-    const errorData = error.response.data;
-    console.error(`${operation} failed:`, errorData);
-
-    // Auto logout if 401 Unauthorized
-    if (error.response.status === 401) {
-      logout();
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
-      }
-    }
-
-    // Return the error instead of throwing
-    return error;
-  } else if (error.request) {
-    // Request made but no response
-    console.error(`${operation} failed: No response from server`);
-    return new Error("Network error - no response from server");
-  } else {
-    // Request setup error
-    console.error(`${operation} failed:`, error.message);
-    return new Error(`Error setting up ${operation.toLowerCase()} request`);
-  }
-};
-
-
-// const logout = async (logoutAllDevices = false) => {
-//   try {
-//     const token = localStorage.getItem('token');
-    
-//     if (!token) {
-//       console.log('No token found, already logged out');
-//       return;
-//     }
-
-//     const response = await axiosInstance.post(
-//       '/api/v1/auth/logout',
-//       null, // No request body
-//       {
-//         params: { allDevices: logoutAllDevices },
-//         headers: {
-//           'Authorization': `Bearer ${token}`
-//         }
-//       }
-//     );
-
-//     console.log('Logout successful:', response.data);
-
-//     // Clear local storage
-//     localStorage.removeItem('token');
-//     localStorage.removeItem('user');
-//     localStorage.removeItem('cart');
-
-//     // Clear axios default headers
-//     delete axiosInstance.defaults.headers.common['Authorization'];
-
-//     return response.data;
-
-//   } catch (error) {
-//     console.error('Logout failed:', error);
-    
-//     // Still clear local storage even if API call fails
-//     localStorage.removeItem('token');
-//     localStorage.removeItem('user');
-    
-//     throw error;
-//   }
-// };
-
-const logout = async (logoutAllDevices = false) => {
+/**
+ * Send verification email to user
+ */
+const sendVerificationEmail = async (userId, adminToken) => {
   try {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      console.log('No token found, already logged out');
-      return { success: true, message: 'Already logged out locally' };
-    }
-
-    const response = await axiosInstance.post(
-      '/api/v1/auth/logout',
-      null,
+    await axios.put(
+      `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users/${userId}/send-verify-email`,
+      {},
       {
-        params: { allDevices: logoutAllDevices },
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+        params: {
+          client_id: KEYCLOAK_CLIENT_ID,
+          redirect_uri: `${window.location.origin}/email-verified`,
+        },
       }
     );
-
-    // Validate response
-    if (response.status === 200) {
-      console.log(`✅ ${logoutAllDevices ? 'All devices' : 'Current device'} logout successful`);
-      
-      // Clear local storage
-      clearUserData();
-      
-      return {
-        success: true,
-        message: logoutAllDevices 
-          ? 'Logged out from all devices' 
-          : 'Logged out successfully',
-        data: response.data
-      };
-    } else {
-      throw new Error(`Unexpected response: ${response.status}`);
-    }
-
   } catch (error) {
-    console.error('❌ Logout failed:', error);
-    clearUserData(); // Still clear local data
-    
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Logout failed',
-      error: error
-    };
+    console.error("Failed to send verification email:", error);
+    throw error;
   }
-}
+};
 
-// Usage
-const handleLogout = async () => {
+/**
+ * Extract user info from JWT token
+ */
+const getUserInfoFromToken = (token) => {
   try {
-    await logout(false); // Logout from current device only
-    // OR
-    // await logout(true); // Logout from all devices
-    navigate('/login');
+    const payload = parseJwt(token);
+
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      username: payload.preferred_username,
+      fullName:
+        payload.name ||
+        `${payload.given_name || ""} ${payload.family_name || ""}`.trim(),
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+      roles: payload.realm_access?.roles || [],
+      emailVerified: payload.email_verified || false,
+      token: token,
+      authProvider: "KEYCLOAK",
+      timestamp: new Date().toISOString(),
+    };
   } catch (error) {
-    // Even if API fails, we're logged out locally
-    navigate('/login');
+    console.error("Failed to parse user info from token:", error);
+    return null;
   }
 };
 
-// Check if user is authenticated
-const isAuthenticated = () => {
-  const token = getToken();
-  return !!token;
-};
+// ... [Previous helper functions: parseJwt, storeKeycloakTokens, clearKeycloakTokens, etc.] ...
 
-// Get current user info
-const getCurrentUser = () => {
-  const userData = localStorage.getItem("user");
-  if (userData) {
-    try {
-      return JSON.parse(userData);
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      return null;
-    }
-  }
-  return null;
-};
-
-const authService = {
-  signup,
-  signin,
-  getToken,
-  clearAllTokens,
-  logout,
-  isAuthenticated,
-  getCurrentUser,
-  handleLogout
-};
-
-export default authService; 
+export default keycloakService;
