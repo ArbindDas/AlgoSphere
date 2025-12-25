@@ -142,6 +142,8 @@ const MegaMenu = ({ isOpen, onClose }) => {
                           <div className={`p-2 rounded-lg ${getColorClass(feature.color)}`}>
                             {feature.icon}
                           </div>
+
+                          
                           <div>
                             <h4 className={`font-semibold ${
                               theme === 'dark' ? 'text-gray-200' : 'text-gray-800'

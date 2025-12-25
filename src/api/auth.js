@@ -1,16 +1,10 @@
+
+
 import axios from "axios";
-import { em } from "framer-motion/client";
-import { error } from "three";
 
 // URLs
 const API_GATEWAY_URL = "http://localhost:8765"; // API Gateway
-const KEYCLOAK_URL = "http://localhost:8080"; // Keycloak server
-const KEYCLOAK_REALM = "microservices-realm";
-const KEYCLOAK_CLIENT_ID = "spring-cloud-client";
-
-// For admin operations (signup requires admin credentials)
-const KEYCLOAK_ADMIN_USERNAME = "admin"; // Or your Keycloak admin username
-const KEYCLOAK_ADMIN_PASSWORD = "admin123"; // Or your Keycloak admin password
+const AUTH_STORAGE_KEY = "keycloak_auth_data";
 
 const axiosInstance = axios.create({
   baseURL: API_GATEWAY_URL,
@@ -20,7 +14,165 @@ const axiosInstance = axios.create({
   },
 });
 
-// ============= SIGNUP IMPLEMENTATION =============
+// ============= TOKEN MANAGEMENT =============
+
+/**
+ * Store authentication data
+ */
+const storeAuthData = (authData) => {
+  try {
+    // Store in localStorage
+    localStorage.setItem('keycloak_auth', JSON.stringify(authData));
+    
+    // Also set default Authorization header for axios
+    if (authData.accessToken) {
+      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${authData.accessToken}`;
+    }
+    
+    console.log("🔐 Auth data stored to localStorage");
+  } catch (error) {
+    console.error("Failed to store auth data:", error);
+  }
+};
+
+/**
+ * Get stored authentication data
+ */
+const getAuthData = () => {
+  try {
+    const data = localStorage.getItem(AUTH_STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error("Failed to get auth data:", error);
+    return null;
+  }
+};
+
+/**
+ * Clear authentication data
+ */
+const clearAuthData = () => {
+  try {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    delete axiosInstance.defaults.headers.common['Authorization'];
+  } catch (error) {
+    console.error("Failed to clear auth data:", error);
+  }
+};
+
+/**
+ * Get access token
+ */
+const getAccessToken = () => {
+  const authData = getAuthData();
+  return authData?.accessToken || null;
+};
+
+/**
+ * Get refresh token
+ */
+const getRefreshToken = () => {
+  const authData = getAuthData();
+  return authData?.refreshToken || null;
+};
+
+/**
+ * Check if user is authenticated
+ */
+const isAuthenticated = () => {
+  const authData = getAuthData();
+  if (!authData?.accessToken) return false;
+  
+  // Optional: Check token expiry
+  try {
+    const token = authData.accessToken;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiry = payload.exp * 1000; // Convert to milliseconds
+    return Date.now() < expiry;
+  } catch {
+    return true; // If we can't parse, assume valid
+  }
+};
+
+/**
+ * Refresh token function
+ */
+const refreshAccessToken = async () => {
+  try {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    const response = await axiosInstance.post("/api/v1/auth/refresh-token", {
+      refreshToken: refreshToken
+    });
+
+    if (response.data.accessToken) {
+      const authData = getAuthData() || {};
+      const newAuthData = {
+        ...authData,
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken || refreshToken,
+      };
+      storeAuthData(newAuthData);
+      return newAuthData.accessToken;
+    }
+    
+    throw new Error("Token refresh failed");
+  } catch (error) {
+    console.error("Token refresh error:", error);
+    clearAuthData(); // Clear invalid tokens
+    throw error;
+  }
+};
+
+// ============= AXIOS INTERCEPTOR FOR AUTO-REFRESH =============
+
+// Add request interceptor to attach token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for token refresh
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // If 401 and not already retrying
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to refresh token
+        const newToken = await refreshAccessToken();
+        
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        clearAuthData();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// ============= UPDATED SERVICE =============
 
 const keycloakService = {
   /**
@@ -30,7 +182,6 @@ const keycloakService = {
     try {
       console.log("Starting signup for: ", email);
 
-      // call your api-gateway for signup
       const response = await axiosInstance.post("/api/v1/auth/signup", {
         fullName,
         email,
@@ -38,211 +189,187 @@ const keycloakService = {
         confirmPassword,
       });
 
-      console.log("Signup successfully ", response.data);
-
+      console.log("Signup successful ", response.data);
       return response.data;
     } catch (error) {
       console.error("Signup failed", error);
-      let erroMessage = "Registration failed .please try agaain";
+      let errorMessage = "Registration failed. Please try again";
 
       if (error.response) {
-        //handle api-gateway
         const status = error.response.status;
         const data = error.response.data;
 
         switch (status) {
-          case 409: // conflict
-            erroMessage = data?.message || "User already exists";
-            // data?.message → safely try to read message
-
-            // || → if that fails, use default text
+          case 409:
+            errorMessage = data?.message || "User already exists";
             break;
-
-          case 400: // bad request
-            erroMessage = data?.message || "Invalid registration data ";
+          case 400:
+            errorMessage = data?.message || "Invalid registration data";
             break;
-
-          case 422: // validation failed
-            erroMessage = data?.message || "vallidation failed";
+          case 422:
+            errorMessage = data?.message || "Validation failed";
             break;
-
-          case 500: // internal server errror
-            erroMessage = data?.message || "internal server error";
+          case 500:
+            errorMessage = data?.message || "Internal server error";
             break;
-
           default:
-            erroMessage = data?.message || `Registration failed (${status})`;
+            errorMessage = data?.message || `Registration failed (${status})`;
         }
       } else if (error.message) {
-        erroMessage = error.message;
+        errorMessage = error.message;
       }
 
-      throw new Error(erroMessage);
+      throw new Error(errorMessage);
     }
   },
-
 
   /**
    * SIGNIN: Login with username/email and password
    */
-  signin: async ({email , password}) =>  {
-    try {
 
-      console.log("starting login for : ", email);
+    signin: async ({ email, password }) => {
+  try {
+    console.log("Starting login for: ", email);
 
+    const response = await axiosInstance.post("/api/v1/auth/login", {
+      email,
+      password,
+    });
 
-      const response = await axiosInstance.post("/api/v1/auth/login", {
+    console.log("🔍 FULL RESPONSE:", response.data);
 
-        email,
-        password
-
-      });
-
-
-         // 🚨 NEW DEBUG: Check the token structure properly
-        if (response.data.accessToken) {
-            const token = response.data.accessToken;
-            console.log("=== TOKEN DEBUG START ===");
-            
-            // Split the token
-            const parts = token.split('.');
-            console.log("Token has", parts.length, "parts");
-            
-            if (parts.length >= 2) {
-                try {
-                    // Decode the payload (middle part)
-                    const payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
-                    console.log("Decoded payload:", payload);
-                    
-                    // Parse as JSON
-                    const parsed = JSON.parse(payload);
-                    console.log("Parsed JSON - realm_access:", parsed.realm_access);
-                    console.log("Parsed JSON - ALL roles:", parsed.realm_access?.roles);
-                    console.log("Is ADMIN in token?", parsed.realm_access?.roles?.includes('ADMIN'));
-                } catch (e) {
-                    console.error("Failed to decode/parse:", e);
-                }
-            }
-            console.log("=== TOKEN DEBUG END ===");
-        }
-        
-        return response.data;
-        
-        return response.data;
-
-
-      console.log("login successed : ", response.data);
-      // return response.data;
-
-      
-    } catch (error) {
-      
-
-      console.error("login failed..." , error);
-
-      let erroMessage = "login failed please try again letter";
-
-      if (error.response) {
-
-
-        // handle api-gateway
-
-        let status = error.response.status;
-        let data = error.response.data;
-
-
-        switch (status) {
-          case 409: // conflic
-            erroMessage = data?.message || "user already exists";
-            break;
-            
-          case 400: // bad request
-            erroMessage = data?.message || "invalid registration data";
-            break;
-            
-
-          case 422: //  validation failed
-            erroMessage = data?.message|| "validation failed";
-            break;
-          
-          case 403:
-            erroMessage = data?.message || "Access denied. Please verify your account or contact support"
-            break;
-
-          case 404:
-            erroMessage = data?.message || "No account found with this email. Please sign up first."
-            break;
-
-          case 500:
-            erroMessage = data?.message || "internal server error";
-            break;
-        
-          default:
-            erroMessage = `registration failed (${status})`
-            break;
-        }
-      }else if (error.message) {
-
-          erroMessage = error.message;
-        
-      }
-
+    // ✅ Extract data from nested structure
+    const { data } = response.data;
+    
+    if (!data || !data.accessToken) {
+      console.error("Invalid response structure:", response.data);
+      throw new Error("Invalid server response");
     }
 
-    throw new error(erroMessage)
+    // ✅ CRITICAL: STORE THE TOKEN!
+    const authData = {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      user: data.user,
+      expiresIn: data.expiresIn,
+      refreshExpiresIn: data.refreshExpiresIn,
+      scope: data.scope,
+      tokenType: data.tokenType,
+      timestamp: new Date().toISOString(),
+    };
+    
+    storeAuthData(authData);
+    
+    console.log("✅ Login successful!", {
+      message: response.data.message,
+      user: data.user,
+      tokenPreview: data.accessToken.substring(0, 30) + '...'
+    });
+
+    return response.data;
+    
+  } catch (error) {
+    console.error("Login failed...", error);
+    throw error;
+  }
+},
+  /**
+   * LOGOUT: Clear tokens and logout from server
+   */
+  logout: async () => {
+    try {
+      const authData = getAuthData();
+      
+      if (authData?.accessToken) {
+        // Call backend logout endpoint
+        await axiosInstance.post("/api/v1/auth/logout", {
+          refreshToken: authData.refreshToken,
+        });
+      }
+      
+      // Clear local storage regardless
+      clearAuthData();
+      console.log("User logged out successfully");
+      
+      return { success: true, message: "Logged out successfully" };
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still clear local storage even if server call fails
+      clearAuthData();
+      throw error;
+    }
   },
 
   /**
-   * FORGOT PASSWORD: Initiate password reset
+   * GET CURRENT USER: Get stored user info
+   */
+  getCurrentUser: () => {
+    const authData = getAuthData();
+    if (!authData?.user) return null;
+    
+    return {
+      ...authData.user,
+      isAuthenticated: true,
+      token: authData.accessToken,
+    };
+  },
+
+  /**
+   * VALIDATE TOKEN: Check if token is valid
+   */
+  validateToken: async () => {
+    try {
+      const token = getAccessToken();
+      if (!token) return { valid: false };
+      
+      const response = await axiosInstance.post("/api/v1/auth/validate", {
+        token: token,
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error("Token validation failed:", error);
+      return { valid: false };
+    }
+  },
+
+  /**
+   * REFRESH TOKEN: Manually refresh token
+   */
+  refreshToken: async () => {
+    return refreshAccessToken();
+  },
+
+  /**
+   * CHECK AUTH STATUS
+   */
+  isAuthenticated: () => {
+    return isAuthenticated();
+  },
+
+  /**
+   * GET ACCESS TOKEN
+   */
+  getToken: () => {
+    return getAccessToken();
+  },
+
+  /**
+   * FORGOT PASSWORD
    */
   forgotPassword: async (email) => {
     try {
       console.log("🔑 Initiating password reset for:", email);
-
-      // Get admin token
-      const adminToken = await getKeycloakAdminToken();
-
-      // Find user by email
-      const usersResponse = await axios.get(
-        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users`,
-        {
-          params: { email: email, exact: true },
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        }
-      );
-
-      if (usersResponse.data.length === 0) {
-        throw new Error("User not found");
-      }
-
-      const userId = usersResponse.data[0].id;
-
-      // Execute actions email
-      const executeActionsResponse = await axios.put(
-        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users/${userId}/execute-actions-email`,
-        ["UPDATE_PASSWORD"], // Action to execute
-        {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-            "Content-Type": "application/json",
-          },
-          params: {
-            client_id: KEYCLOAK_CLIENT_ID,
-            lifespan: 43200, // 12 hours in minutes
-          },
-        }
-      );
-
-      return {
-        success: true,
-        message: "Password reset email sent. Please check your inbox.",
-      };
+      
+      const response = await axiosInstance.post("/api/v1/auth/forgot-password", {
+        email: email,
+      });
+      
+      return response.data;
     } catch (error) {
       console.error("Password reset failed:", error);
       throw new Error(
-        error.response?.data?.errorMessage || "Failed to send reset email"
+        error.response?.data?.message || "Failed to send reset email"
       );
     }
   },
@@ -252,177 +379,29 @@ const keycloakService = {
    */
   resendVerificationEmail: async (email) => {
     try {
-      const adminToken = await getKeycloakAdminToken();
-
-      // Find user
-      const usersResponse = await axios.get(
-        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users`,
-        {
-          params: { email: email, exact: true },
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        }
-      );
-
-      if (usersResponse.data.length === 0) {
-        throw new Error("User not found");
-      }
-
-      const userId = usersResponse.data[0].id;
-
-      // Send verification email
-      await axios.put(
-        `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users/${userId}/send-verify-email`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-          params: {
-            client_id: KEYCLOAK_CLIENT_ID,
-          },
-        }
-      );
-
-      return {
-        success: true,
-        message: "Verification email sent successfully",
-      };
+      const response = await axiosInstance.post("/api/v1/auth/resend-verification", {
+        email: email,
+      });
+      
+      return response.data;
     } catch (error) {
       console.error("Resend verification failed:", error);
       throw error;
     }
   },
-
-  // ... [Previous functions: isAuthenticated, getCurrentUser, logout, etc.] ...
 };
 
-// ============= HELPER FUNCTIONS =============
+// ============= INITIALIZATION =============
 
-/**
- * Get admin token for Keycloak operations
- */
-const getKeycloakAdminToken = async () => {
-  try {
-    // Check if we have a cached admin token
-    const cachedToken = localStorage.getItem("kc_admin_token");
-    const cachedExp = localStorage.getItem("kc_admin_token_exp");
-
-    if (cachedToken && cachedExp && Date.now() < parseInt(cachedExp)) {
-      return cachedToken;
-    }
-
-    // Get new admin token
-    const response = await axios.post(
-      `${KEYCLOAK_URL}/realms/master/protocol/openid-connect/token`,
-      new URLSearchParams({
-        client_id: "admin-cli",
-        grant_type: "password",
-        username: KEYCLOAK_ADMIN_USERNAME,
-        password: KEYCLOAK_ADMIN_PASSWORD,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    const token = response.data.access_token;
-    const expiresIn = response.data.expires_in * 1000; // Convert to milliseconds
-
-    // Cache token
-    localStorage.setItem("kc_admin_token", token);
-    localStorage.setItem("kc_admin_token_exp", Date.now() + expiresIn);
-
-    return token;
-  } catch (error) {
-    console.error("Failed to get admin token:", error);
-    throw new Error(
-      "Administrative error. Please check Keycloak admin credentials."
-    );
+// Initialize axios with stored token on page load
+const initAuth = () => {
+  const token = getAccessToken();
+  if (token) {
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 };
 
-/**
- * Get Keycloak user ID by email
- */
-const getKeycloakUserId = async (email, adminToken) => {
-  try {
-    const response = await axios.get(
-      `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users`,
-      {
-        params: { email: email, exact: true },
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
-      }
-    );
-
-    if (response.data.length > 0) {
-      return response.data[0].id;
-    }
-
-    throw new Error("User not found after creation");
-  } catch (error) {
-    console.error("Failed to get user ID:", error);
-    throw error;
-  }
-};
-
-/**
- * Send verification email to user
- */
-const sendVerificationEmail = async (userId, adminToken) => {
-  try {
-    await axios.put(
-      `${KEYCLOAK_URL}/admin/realms/${KEYCLOAK_REALM}/users/${userId}/send-verify-email`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
-        params: {
-          client_id: KEYCLOAK_CLIENT_ID,
-          redirect_uri: `${window.location.origin}/email-verified`,
-        },
-      }
-    );
-  } catch (error) {
-    console.error("Failed to send verification email:", error);
-    throw error;
-  }
-};
-
-/**
- * Extract user info from JWT token
- */
-const getUserInfoFromToken = (token) => {
-  try {
-    const payload = parseJwt(token);
-
-    return {
-      userId: payload.sub,
-      email: payload.email,
-      username: payload.preferred_username,
-      fullName:
-        payload.name ||
-        `${payload.given_name || ""} ${payload.family_name || ""}`.trim(),
-      firstName: payload.given_name,
-      lastName: payload.family_name,
-      roles: payload.realm_access?.roles || [],
-      emailVerified: payload.email_verified || false,
-      token: token,
-      authProvider: "KEYCLOAK",
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error) {
-    console.error("Failed to parse user info from token:", error);
-    return null;
-  }
-};
-
-// ... [Previous helper functions: parseJwt, storeKeycloakTokens, clearKeycloakTokens, etc.] ...
+// Call initialization
+initAuth();
 
 export default keycloakService;
