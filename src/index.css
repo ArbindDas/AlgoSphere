@@ -34,3 +34,13 @@
   0%, 100% { opacity: 1; }
    50% { opacity: 0.3; }
  }
+
+
+input {
+  color: #000 !important;
+  background-color: #fff !important;
+}
+
+button {
+  color: inherit !important;
+}

@@ -174,7 +174,7 @@ export const useSignupValidation = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Check if form is valid
+  // Check if form is valid 
   const isFormValid = () => {
   const hasNoErrors = Object.keys(errors).length === 0;
   const isFormComplete = formData.fullName && 
@@ -184,6 +184,33 @@ export const useSignupValidation = () => {
   
   return hasNoErrors && isFormComplete;
 };
+
+
+// Add reset function to your hook
+const resetForm = useCallback(() => {
+  setFormData({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  
+  setErrors({});
+  setHasInteracted({
+    fullName: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
+  setFieldFocus({
+    fullName: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
+  setShowPassword(false);
+  setShowConfirmPassword(false);
+}, []);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -210,5 +237,6 @@ export const useSignupValidation = () => {
     validateForm,
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
+     resetForm,
   };
 };
