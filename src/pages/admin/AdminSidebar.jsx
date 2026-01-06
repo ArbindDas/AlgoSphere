@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Users,
   BarChart3, Settings, LogOut, Bell, ChevronDown, ChevronRight, Moon, Sun
 } from 'lucide-react';
-
+import * as userService from "../../api/user"; // Using your provided service
 const AdminSidebar = ({ activeTab, setActiveTab, user }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -232,13 +232,18 @@ const AdminSidebar = ({ activeTab, setActiveTab, user }) => {
                 <Settings size={16} />
                 <span className="text-sm">Account Settings</span>
               </button>
-              <button className={`w-full flex items-center gap-3 px-4 py-3 transition-colors border-t ${
+              <button 
+              onClick={()=> {
+                userService.logout();
+                
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors border-t ${
                 isDarkMode 
                   ? 'hover:bg-slate-700 text-red-400 hover:text-red-300 border-slate-700'
                   : 'hover:bg-gray-100 text-red-600 hover:text-red-700 border-gray-200'
               }`}>
                 <LogOut size={16} />
-                <span className="text-sm">Log Out</span>
+                <span  className="text-sm">Log Out</span>
               </button>
             </div>
           )}

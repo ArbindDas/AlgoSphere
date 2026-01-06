@@ -107,7 +107,7 @@ const ThreeBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none opacity-30"
+      className="fixed inset-0 pointer-events-none opacity-30 -z-10"
     />
   );
 };
@@ -180,8 +180,8 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
 };
 
 const UserManagement = () => {
- const {
-    formData,  // ✅ Use this from the hook
+  const {
+    formData, // ✅ Use this from the hook
     errors,
     fieldFocus,
     hasInteracted,
@@ -196,7 +196,7 @@ const UserManagement = () => {
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
     validateForm,
-    resetForm,  // ✅ Use resetForm from the hook
+    resetForm, // ✅ Use resetForm from the hook
   } = useSignupValidation();
 
   const [users, setUsers] = useState([]);
@@ -210,7 +210,15 @@ const UserManagement = () => {
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionMenuOpen, setActionMenuOpen] = useState(null);
-
+  // Separate form data for edit modal
+  const [editFormData, setEditFormData] = useState({
+    username: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    enabled: true,
+    emailVerified: false,
+  });
 
   const [passwordData, setPasswordData] = useState({
     newPassword: "",
@@ -342,87 +350,48 @@ const UserManagement = () => {
   };
 
   const handleEditUser = (user) => {
+    console.log("Editing user:", user);
+
     setSelectedUser(user);
-    setFormData({
-      username: user.username || "",
-      email: user.email || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      enabled: user.enabled || true,
+
+    // Parse fullName into firstName and lastName if needed
+    let firstName = user.firstName || "";
+    let lastName = user.lastName || "";
+
+    // If fullName exists but firstName/lastName don't, parse it
+    if ((!firstName || !lastName) && user.fullName) {
+      const nameParts = user.fullName.split(" ");
+      firstName = nameParts[0] || "";
+      lastName = nameParts.slice(1).join(" ") || "";
+    }
+
+    // Handle username - extract from email if needed
+    // For existing users created before the fix, username might still be email
+    let username = user.username || "";
+    const email = user.email || "";
+
+    // If username is email or contains @, extract username part
+    if (username === email || username.includes("@")) {
+      username = username.split("@")[0];
+    }
+
+    setEditFormData({
+      username: username,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      enabled: user.enabled !== undefined ? user.enabled : true,
       emailVerified: user.emailVerified || false,
     });
+
     setShowEditModal(true);
     setActionMenuOpen(null);
   };
 
-
-
   const handleCreateUser = () => {
-  resetForm(); // Use the hook's resetForm function
-  setShowCreateModal(true);
-};
-
-  // const handleFormSubmit = async (e, isEdit = false) => {
-  //   e.preventDefault();
-
-  //   // Basic validation
-  //   if (!formData.fullName || !formData.email || !formData.password) {
-  //     alert("Full name, email, and password are required");
-  //     return;
-  //   }
-
-  //   // Check if passwords match
-  //   if (formData.password !== formData.confirmPassword) {
-  //     alert("Passwords do not match");
-  //     return;
-  //   }
-
-  //   // Password strength validation (optional)
-  //   if (formData.password.length < 8) {
-  //     alert("Password must be at least 8 characters long");
-  //     return;
-  //   }
-
-  //   try {
-  //     if (isEdit && selectedUser) {
-  //       // For editing, you might need a different endpoint/payload
-  //       // This depends on your update API
-  //       await userService.updateUser(selectedUser.id, {
-  //         fullName: formData.fullName,
-  //         email: formData.email,
-  //       });
-  //       alert("User updated successfully");
-  //       setShowEditModal(false);
-  //       setSelectedUser(null);
-  //     } else {
-  //       // For new users - use the signup API
-  //       await userService.createUser({
-  //         fullName: formData.fullName,
-  //         email: formData.email,
-  //         password: formData.password,
-  //         confirmPassword: formData.confirmPassword,
-  //       });
-  //       alert("User created successfully");
-  //       setShowCreateModal(false);
-  //     }
-
-  //     // Reset form
-  //     setFormData({
-  //       fullName: "",
-  //       email: "",
-  //       password: "",
-  //       confirmPassword: "",
-  //     });
-
-  //     fetchUsers(); // Refresh the user list
-  //   } catch (err) {
-  //     alert(
-  //       `Failed to ${isEdit ? "update" : "create"} user: ${
-  //         err.message || "Unknown error"
-  //       }`
-  //     );
-  //   }
-  // };
+    resetForm(); // Use the hook's resetForm function
+    setShowCreateModal(true);
+  };
 
   // Updated handleFormSubmit that uses validation
   const handleFormSubmit = async (e) => {
@@ -458,8 +427,71 @@ const UserManagement = () => {
     }
   };
 
+  const handleEditInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
+  // Handle edit user form submission - DON'T CHANGE USERNAME
+  const handleEditFormSubmit = async (e) => {
+    e.preventDefault();
 
+    if (!selectedUser) return;
+
+    try {
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!editFormData.email?.trim()) {
+        alert("Email is required");
+        return;
+      }
+
+      if (!emailRegex.test(editFormData.email)) {
+        alert("Please enter a valid email address");
+        return;
+      }
+
+      // DO NOT send username in update - Keycloak often rejects username changes
+      const updatedData = {
+        email: editFormData.email.trim(),
+        firstName: editFormData.firstName?.trim() || "",
+        lastName: editFormData.lastName?.trim() || "",
+        enabled: Boolean(editFormData.enabled),
+        emailVerified: Boolean(editFormData.emailVerified),
+      };
+
+      console.log("Sending update (without username):", updatedData);
+
+      const response = await userService.updateUser(
+        selectedUser.id,
+        updatedData
+      );
+      console.log("Update response:", response);
+
+      alert("User updated successfully");
+      setShowEditModal(false);
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (err) {
+      console.error("Update error:", err);
+
+      // Better error handling
+      if (err.response?.status === 409) {
+        alert("Email already exists. Please use a different email.");
+      } else if (err.response?.status === 400) {
+        alert("Invalid data. Please check your inputs.");
+      } else {
+        alert(
+          `Error: ${
+            err.response?.data?.message || err.message || "Unknown error"
+          }`
+        );
+      }
+    }
+  };
   // Helper function to get field styling
   const getFieldClasses = (fieldName) => {
     const hasError = errors[fieldName] && hasInteracted[fieldName];
@@ -504,14 +536,6 @@ const UserManagement = () => {
       </div>
     </div>
   );
-
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
 
   const handlePasswordChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -660,7 +684,7 @@ const UserManagement = () => {
           {filteredUsers.map((user) => (
             <div
               key={user.id}
-              className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group border border-white/20 relative hover:scale-105 hover:-translate-y-2 cursor-pointer"
+              className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-visible group border border-white/20 relative hover:scale-105 hover:-translate-y-2 cursor-pointer"
               style={{
                 boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
                 transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -690,14 +714,22 @@ const UserManagement = () => {
                       <MoreVertical size={16} className="text-white" />
                     </button>
 
+                    {/* Action Menu Dropdown - FIXED VERSION */}
                     {actionMenuOpen === user.id && (
-                      <div className="action-menu-dropdown absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-2xl py-1 z-10 border border-gray-200">
+                      <div
+                        className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-2xl py-1 z-[99999] border border-gray-200"
+                        style={{
+                          boxShadow:
+                            "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+                          animation: "dropdownFadeIn 0.2s ease-out",
+                        }}
+                      >
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditUser(user);
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm"
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm hover:text-blue-600 transition-colors"
                         >
                           <Edit size={14} />
                           Edit
@@ -708,7 +740,7 @@ const UserManagement = () => {
                             handleToggleUserStatus(user.id, user.enabled);
                             setActionMenuOpen(null);
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm"
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm hover:text-blue-600 transition-colors"
                         >
                           <Power size={14} />
                           {user.enabled ? "Disable" : "Enable"}
@@ -720,7 +752,7 @@ const UserManagement = () => {
                             setShowResetPasswordModal(true);
                             setActionMenuOpen(null);
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm"
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm hover:text-blue-600 transition-colors"
                         >
                           <Key size={14} />
                           Reset Password
@@ -732,7 +764,7 @@ const UserManagement = () => {
                               handleSendVerification(user.id);
                               setActionMenuOpen(null);
                             }}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 text-sm hover:text-blue-600 transition-colors"
                           >
                             <Send size={14} />
                             Send Verification
@@ -748,7 +780,7 @@ const UserManagement = () => {
                             );
                             setActionMenuOpen(null);
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 text-sm"
+                          className="w-full px-3 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 text-sm hover:text-red-700 transition-colors"
                         >
                           <Trash2 size={14} />
                           Delete
@@ -757,20 +789,36 @@ const UserManagement = () => {
                     )}
                   </div>
                 </div>
-
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 group-hover:shadow-2xl">
                     <span className="text-lg font-bold text-blue-600 group-hover:text-purple-600 transition-colors duration-500">
-                      {(user.firstName || user.username || "U")
-                        .charAt(0)
-                        .toUpperCase()}
+                      {(() => {
+                        // Get first letter from username or email
+                        const displayName = user.username || user.email || "";
+                        const cleanName = displayName.includes("@")
+                          ? displayName.split("@")[0]
+                          : displayName;
+
+                        if (cleanName && cleanName.length > 0) {
+                          return cleanName.charAt(0).toUpperCase();
+                        }
+
+                        // Fallback to firstName
+                        if (user.firstName)
+                          return user.firstName.charAt(0).toUpperCase();
+
+                        return "U";
+                      })()}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-base font-bold text-white truncate">
                       {user.firstName && user.lastName
                         ? `${user.firstName} ${user.lastName}`
-                        : user.username || user.email}
+                        : user.fullName ||
+                          `${
+                            user.username || user.email?.split("@")[0] || "User"
+                          }`}
                     </h3>
                     <div className="flex gap-1 mt-1">
                       {user.enabled ? (
@@ -1118,7 +1166,7 @@ const UserManagement = () => {
           </div>
         </form>
       </Modal>
-
+      
       {/* Edit Modal */}
       <Modal
         isOpen={showEditModal}
@@ -1130,21 +1178,22 @@ const UserManagement = () => {
         size="lg"
       >
         {selectedUser && (
-          <form onSubmit={(e) => handleFormSubmit(e, true)}>
+          <form onSubmit={handleEditFormSubmit}>
             <div className="space-y-4">
+              {/* Username - Display only, not editable */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Username *
+                  Username
                 </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  required
-                />
+                <div className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 text-gray-700">
+                  {editFormData.username}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Username cannot be changed. Extracted from email:{" "}
+                  {editFormData.email?.split("@")[0]}
+                </p>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email *
@@ -1152,12 +1201,13 @@ const UserManagement = () => {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={editFormData.email}
+                  onChange={handleEditInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1166,8 +1216,8 @@ const UserManagement = () => {
                   <input
                     type="text"
                     name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
+                    value={editFormData.firstName}
+                    onChange={handleEditInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
                 </div>
@@ -1178,24 +1228,20 @@ const UserManagement = () => {
                   <input
                     type="text"
                     name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
+                    value={editFormData.lastName}
+                    onChange={handleEditInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
+
               <div className="flex gap-4">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     name="enabled"
-                    checked={formData.enabled}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        enabled: e.target.checked,
-                      }))
-                    }
+                    checked={editFormData.enabled}
+                    onChange={handleEditInputChange}
                     className="mr-2"
                   />
                   <span className="text-sm text-gray-700">Enabled</span>
@@ -1204,18 +1250,14 @@ const UserManagement = () => {
                   <input
                     type="checkbox"
                     name="emailVerified"
-                    checked={formData.emailVerified}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        emailVerified: e.target.checked,
-                      }))
-                    }
+                    checked={editFormData.emailVerified}
+                    onChange={handleEditInputChange}
                     className="mr-2"
                   />
                   <span className="text-sm text-gray-700">Email Verified</span>
                 </label>
               </div>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"

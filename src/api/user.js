@@ -88,7 +88,7 @@ axiosInstance.interceptors.response.use(
                 localStorage.removeItem('keycloak_auth');
                 
                 // Redirect to login page (adjust path as needed)
-                window.location.href = '/login';
+                // window.location.href = '/login';
                 
                 return Promise.reject(refreshError);
             }
