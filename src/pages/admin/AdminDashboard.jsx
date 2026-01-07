@@ -1,10 +1,13 @@
+
+
 // AdminDashboard.jsx - Complete E-commerce Admin Dashboard
 import React, { useState, useEffect } from 'react';
 import withAuth from "../../context/hoc/withAuth";
 import {
   BarChart3, Users, Package, ShoppingCart, DollarSign,
   TrendingUp, AlertCircle, CheckCircle, XCircle, Settings,
-  Eye, Edit, Trash2, Download, Filter, Search, Plus, MoreVertical
+  Eye, Edit, Trash2, Download, Filter, Search, Plus, MoreVertical,
+  Sun, Moon
 } from 'lucide-react';
 
 // Import components
@@ -13,24 +16,24 @@ import ProductManagement from './ProductManagement';
 import StatsCard from './StatsCard';
 import UserManagement from './UserManagement';
 import AnalyticsChart from './AnalyticsChart';
-import RecentOrdersTable from './ RecentOrdersTable'
+import RecentOrdersTable from './ RecentOrdersTable';
+import { useTheme } from '../../context/ThemeContext'; // Import theme context
 
 const AdminDashboard = ({ user }) => {
+  const { theme, toggleTheme } = useTheme(); // Get theme from context
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,
     totalProducts: 0,
-    totalCustomers: 0, // Added missing property
+    totalCustomers: 0,
     pendingOrders: 0,
     lowStockProducts: 0
   });
 
   // Mock data - Replace with API calls
   useEffect(() => {
-    // Fetch dashboard stats
     const fetchStats = async () => {
-      // API call would go here
       setStats({
         totalRevenue: 45231.89,
         totalOrders: 1245,
@@ -57,6 +60,7 @@ const AdminDashboard = ({ user }) => {
                 change="+12.5%"
                 icon={DollarSign}
                 color="green"
+                theme={theme}
               />
               <StatsCard
                 title="Total Orders"
@@ -64,6 +68,7 @@ const AdminDashboard = ({ user }) => {
                 change="+8.2%"
                 icon={ShoppingCart}
                 color="blue"
+                theme={theme}
               />
               <StatsCard
                 title="Total Products"
@@ -71,6 +76,7 @@ const AdminDashboard = ({ user }) => {
                 change="+3.1%"
                 icon={Package}
                 color="purple"
+                theme={theme}
               />
               <StatsCard
                 title="Total Customers"
@@ -78,6 +84,7 @@ const AdminDashboard = ({ user }) => {
                 change="+15.3%"
                 icon={Users}
                 color="orange"
+                theme={theme}
               />
               <StatsCard
                 title="Pending Orders"
@@ -85,6 +92,7 @@ const AdminDashboard = ({ user }) => {
                 change="-2.4%"
                 icon={AlertCircle}
                 color="yellow"
+                theme={theme}
               />
               <StatsCard
                 title="Low Stock Items"
@@ -92,38 +100,63 @@ const AdminDashboard = ({ user }) => {
                 change="+5.6%"
                 icon={AlertCircle}
                 color="red"
+                theme={theme}
               />
             </div>
 
             {/* Charts and Recent Orders */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Revenue Analytics</h3>
-                <AnalyticsChart />
+              <div className={`rounded-xl shadow p-6 ${
+                theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-4 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Revenue Analytics
+                </h3>
+                <AnalyticsChart theme={theme} />
               </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
-                <RecentOrdersTable />
+              <div className={`rounded-xl shadow p-6 ${
+                theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-4 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Recent Orders
+                </h3>
+                <RecentOrdersTable theme={theme} />
               </div>
             </div>
           </div>
         );
 
       case 'products':
-        return <ProductManagement />;
+        return <ProductManagement theme={theme} />;
 
       case 'orders':
         return (
-          <div className="bg-white rounded-xl shadow">
-            <div className="p-6 border-b">
+          <div className={`rounded-xl shadow ${
+            theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'
+          }`}>
+            <div className={`p-6 border-b ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            }`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold">Order Management</h2>
+                <h2 className={`text-xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Order Management
+                </h2>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                  <button className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}>
                     <Filter size={16} />
                     Filter
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
                     <Download size={16} />
                     Export
                   </button>
@@ -135,12 +168,18 @@ const AdminDashboard = ({ user }) => {
         );
 
       case 'customers':
-        return <UserManagement />;
+        return <UserManagement />; // UserManagement already has its own theme context
 
       case 'analytics':
         return (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-bold mb-6">Advanced Analytics</h2>
+          <div className={`rounded-xl shadow p-6 ${
+            theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'
+          }`}>
+            <h2 className={`text-xl font-bold mb-6 ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              Advanced Analytics
+            </h2>
             <div className="space-y-6">
               {/* Multiple analytics charts would go here */}
             </div>
@@ -149,8 +188,14 @@ const AdminDashboard = ({ user }) => {
 
       case 'settings':
         return (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-bold mb-6">System Settings</h2>
+          <div className={`rounded-xl shadow p-6 ${
+            theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'
+          }`}>
+            <h2 className={`text-xl font-bold mb-6 ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              System Settings
+            </h2>
             {/* Settings form would go here */}
           </div>
         );
@@ -161,29 +206,51 @@ const AdminDashboard = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${
+      theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'
+    }`}>
       <div className="flex">
-        {/* Sidebar */}
+        {/* Sidebar - Pass theme prop */}
         <AdminSidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           user={user}
+          theme={theme}
         />
 
         {/* Main Content */}
         <div className="flex-1 p-6 lg:p-8">
-          {/* Header */}
+          {/* Header with Theme Toggle */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {activeTab === 'overview' ? 'Dashboard Overview' : 
-               activeTab === 'products' ? 'Product Management' :
-               activeTab === 'orders' ? 'Order Management' :
-               activeTab === 'customers' ? 'Customer Management' :
-               activeTab === 'analytics' ? 'Analytics' : 'Settings'}
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Welcome back, {user.name || user.email}! Manage your e-commerce store efficiently.
-            </p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className={`text-3xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {activeTab === 'overview' ? 'Dashboard Overview' : 
+                   activeTab === 'products' ? 'Product Management' :
+                   activeTab === 'orders' ? 'Order Management' :
+                   activeTab === 'customers' ? 'Customer Management' :
+                   activeTab === 'analytics' ? 'Analytics' : 'Settings'}
+                </h1>
+                <p className={`mt-2 ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Welcome back, {user.name || user.email}! Manage your e-commerce store efficiently.
+                </p>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className={`p-3 rounded-xl transition-all ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 hover:bg-gray-700 text-yellow-400'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+            </div>
           </div>
 
           {/* Content */}
