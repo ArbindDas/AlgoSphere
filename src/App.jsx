@@ -13,11 +13,21 @@ function AppLayout() {
   const location = useLocation();
   
   // Check if current path starts with /admin
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  // const isAdminRoute = location.pathname.startsWith('/admin');
+   // Check if current path starts with /admin or /dashboard
+  const hideNavbarRoutes = ['/admin', '/dashboard'];
+  const shouldHideNavbar = hideNavbarRoutes.some(route => 
+    location.pathname.startsWith(route)
+  );
   
   return (
-    <>
-      {!isAdminRoute && <ModernNavbar />}
+    // <>
+    //   {!isAdminRoute && <ModernNavbar />}
+    //   <AppRoutes />
+    // </>
+
+     <>
+      {!shouldHideNavbar && <ModernNavbar />}
       <AppRoutes />
     </>
   );
@@ -25,17 +35,6 @@ function AppLayout() {
 
 function App() {
   return (
-    // <AuthProvider>
-
-    //       <ThemeProvider>
-    //   <Router>
-    //     <ModernNavbar />
-
-    //     <AppRoutes />
-    //   </Router>
-    // </ThemeProvider>
-      
-    // </AuthProvider>
 
 
     <AuthProvider>

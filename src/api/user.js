@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API_GATEWAY_URL = "http://localhost:8765"; // api-gateway
 const USER_BASE_URL = "/api/admin/users";
+const USER_SERVICE_BASE_URL= "/api/users";
 
 const axiosInstance = axios.create({
     baseURL: API_GATEWAY_URL,
@@ -208,4 +209,114 @@ export const logout = () => {
     localStorage.removeItem('keycloak_auth');
     delete axiosInstance.defaults.headers.common['Authorization'];
     window.location.href = '/login';
+};
+
+
+// USER SERVICE ENDPOINTS
+
+// Create user profile with addresses (User Service)
+export const createUserProfile = async (profileData) => {
+    try {
+        const response = await axiosInstance.post(
+            `${USER_SERVICE_BASE_URL}/create-with-address`,
+            profileData
+        );
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 409) {
+            throw new Error('Profile already exists for this user');
+        } else if (error.response?.status === 400) {
+            throw new Error('Invalid data provided');
+        }
+        handleError(error);
+    }
+}
+
+// Get current user profile (User Service)
+export const getUserProfile = async () => {
+    try {
+        const response = await axiosInstance.get(`${USER_SERVICE_BASE_URL}/my-profile`);
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 404) {
+            return null; // Profile doesn't exist
+        }
+        handleError(error);
+    }
+};
+
+
+// Update user profile (User Service)
+export const updateUserProfile = async (profileData) => {
+    try {
+        const response = await axiosInstance.put(
+            `${USER_SERVICE_BASE_URL}/update-profile`,
+            profileData
+        );
+        return response.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+// Add address to profile (User Service)
+export const addUserAddress = async (addressData) => {
+    try {
+        const response = await axiosInstance.post(
+            `${USER_SERVICE_BASE_URL}/add-address`,
+            addressData
+        );
+        return response.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+
+// Update address (User Service)
+export const updateUserAddress = async (addressId, addressData) => {
+    try {
+        const response = await axiosInstance.put(
+            `${USER_SERVICE_BASE_URL}/addresses/${addressId}`,
+            addressData
+        );
+        return response.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+
+
+// Delete address (User Service)
+export const deleteUserAddress = async (addressId) => {
+    try {
+        const response = await axiosInstance.delete(
+            `${USER_SERVICE_BASE_URL}/addresses/${addressId}`
+        );
+        return response.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+
+
+
+// Get user stats (combining both services)
+export const getUserStats = async () => {
+    try {
+        const [keycloakUser, userProfile] = await Promise.allSettled([
+            getUserProfile(), // Try to get user profile
+            // Add more API calls if needed
+        ]);
+
+        return {
+            keycloakUser: keycloakUser.status === 'fulfilled' ? keycloakUser.value : null,
+            userProfile: userProfile.status === 'fulfilled' ? userProfile.value : null,
+        };
+    } catch (error) {
+        console.error("Error fetching user stats:", error);
+        throw error;
+    }
 };
